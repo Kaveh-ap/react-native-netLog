@@ -35,6 +35,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 | `theme` | `'light'` | `'light'`, `'dark'`, or partial theme tokens |
 | `labels` | English | Override any UI string |
 | `showLineNumbers` | `true` | |
+| `showArrayIndexes` | `false` | Show `0:`, `1:`… before array items (paths always include them) |
 | `maxValueLength` | `200` | Display cut-off; copy uses the full value |
 | `rowHeight`, `indent` | `24`, `14` | |
 | `pathRoot` | `'$'` | Root of copied paths |

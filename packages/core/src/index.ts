@@ -13,6 +13,27 @@ export {
 } from './config';
 export { initNetLog, type InitNetLogOptions } from './init';
 export { toCurl, toHar, toShareText, resend, type ExportOptions } from './export';
+export {
+  addMockRule,
+  updateMockRule,
+  removeMockRule,
+  clearMockRules,
+  getMockRules,
+  findMockRule,
+  mockRuleFromEntry,
+  setNetworkCondition,
+  getNetworkCondition,
+  subscribeMocks,
+  setMockStorage,
+  urlMatches,
+  SLOW_DELAY_MS,
+  FLAKY_FAILURE_RATE,
+  type MockRule,
+  type MockRuleInput,
+  type MockAction,
+  type MockStorage,
+  type NetworkCondition,
+} from './mocks';
 export { startCapture, stopCapture, isCapturing, parseHeaders } from './xhr';
 export { getEntries, clearEntries, subscribe, setPaused, isPaused } from './store';
 export {

@@ -16,6 +16,7 @@ export interface JsonViewerLabels {
   scopeKeys: string;
   scopeValues: string;
   expandAll: string;
+  searchIn: string;
   collapseAll: string;
   copyPath: string;
   copyValue: string;
@@ -32,7 +33,8 @@ export const defaultLabels: JsonViewerLabels = {
   scopeKeys: 'Keys',
   scopeValues: 'Values',
   expandAll: 'Expand all',
-  collapseAll: 'Collapse',
+  searchIn: 'Search in',
+  collapseAll: 'Collapse all',
   copyPath: 'Copy path',
   copyValue: 'Copy value',
   invalidJson: 'Not valid JSON. Showing raw text.',
@@ -65,9 +67,11 @@ export function SearchBar(props: Props) {
 
   return (
     <View style={[styles.container, { borderColor: theme.border, backgroundColor: theme.surface }]}>
-      <View style={styles.searchRow}>
-        <View style={[styles.inputWrap, { backgroundColor: theme.inputBackground }]}>
-          <SearchIcon size={16} color={theme.muted} />
+      <View style={[styles.searchBox, { backgroundColor: theme.inputBackground }]}>
+        <View style={styles.inputRow}>
+          <View style={styles.iconBox}>
+            <SearchIcon size={16} color={theme.muted} />
+          </View>
           <TextInput
             value={query}
             onChangeText={props.onQueryChange}
@@ -87,28 +91,27 @@ export function SearchBar(props: Props) {
               {countText}
             </Text>
           ) : null}
+          <Pressable
+            onPress={props.onPrev}
+            disabled={navDisabled}
+            accessibilityRole="button"
+            accessibilityLabel={labels.previousMatch}
+            style={[styles.navButton, { opacity: navDisabled ? 0.35 : 1 }]}
+          >
+            <Chevron direction="up" size={14} color={theme.text} />
+          </Pressable>
+          <Pressable
+            onPress={props.onNext}
+            disabled={navDisabled}
+            accessibilityRole="button"
+            accessibilityLabel={labels.nextMatch}
+            style={[styles.navButton, { opacity: navDisabled ? 0.35 : 1 }]}
+          >
+            <Chevron direction="down" size={14} color={theme.text} />
+          </Pressable>
         </View>
-        <Pressable
-          onPress={props.onPrev}
-          disabled={navDisabled}
-          accessibilityRole="button"
-          accessibilityLabel={labels.previousMatch}
-          style={[styles.navButton, { backgroundColor: theme.inputBackground, opacity: navDisabled ? 0.4 : 1 }]}
-        >
-          <Chevron direction="up" size={16} color={theme.text} />
-        </Pressable>
-        <Pressable
-          onPress={props.onNext}
-          disabled={navDisabled}
-          accessibilityRole="button"
-          accessibilityLabel={labels.nextMatch}
-          style={[styles.navButton, { backgroundColor: theme.inputBackground, opacity: navDisabled ? 0.4 : 1 }]}
-        >
-          <Chevron direction="down" size={16} color={theme.text} />
-        </Pressable>
-      </View>
-      <View style={styles.toolRow}>
-        <View style={[styles.segment, { backgroundColor: theme.inputBackground }]} accessibilityRole="radiogroup">
+        <View style={[styles.scopeRow, { borderTopColor: theme.border }]} accessibilityRole="radiogroup" accessibilityLabel={labels.searchIn}>
+          <Text style={[styles.scopeLabel, { color: theme.muted }]}>{labels.searchIn}</Text>
           {scopes.map(([id, label]) => {
             const on = scope === id;
             return (
@@ -117,17 +120,20 @@ export function SearchBar(props: Props) {
                 onPress={() => props.onScopeChange(id)}
                 accessibilityRole="radio"
                 accessibilityState={{ checked: on }}
-                style={[styles.segmentItem, on && { backgroundColor: theme.surface }]}
+                hitSlop={4}
+                style={[styles.scopeItem, on && { backgroundColor: theme.surface }]}
               >
-                <Text style={[styles.segmentText, { color: on ? theme.text : theme.muted }]}>{label}</Text>
+                <Text style={[styles.scopeText, { color: on ? theme.text : theme.muted, fontWeight: on ? '700' : '500' }]}>{label}</Text>
               </Pressable>
             );
           })}
         </View>
-        <View style={styles.spacer} />
+      </View>
+      <View style={styles.treeRow}>
         <Pressable onPress={props.onExpandAll} accessibilityRole="button" style={styles.linkButton} hitSlop={6}>
           <Text style={[styles.linkText, { color: theme.accent }]}>{labels.expandAll}</Text>
         </Pressable>
+        <Text style={{ color: theme.muted }}>·</Text>
         <Pressable onPress={props.onCollapseAll} accessibilityRole="button" style={styles.linkButton} hitSlop={6}>
           <Text style={[styles.linkText, { color: theme.accent }]}>{labels.collapseAll}</Text>
         </Pressable>
@@ -139,29 +145,22 @@ export function SearchBar(props: Props) {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 12,
-    paddingTop: 8,
-    paddingBottom: 6,
-    gap: 6,
+    paddingTop: 10,
+    paddingBottom: 4,
+    gap: 4,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  searchRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  inputWrap: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 44,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    gap: 6,
-  },
+  searchBox: { borderRadius: 12, overflow: 'hidden' },
+  inputRow: { flexDirection: 'row', alignItems: 'center', height: 44, gap: 2 },
+  iconBox: { width: 36, alignItems: 'center', justifyContent: 'center' },
   input: { flex: 1, fontSize: 14, paddingVertical: 0 },
   count: { fontSize: 12, fontVariant: ['tabular-nums'] },
-  navButton: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  toolRow: { flexDirection: 'row', alignItems: 'center' },
-  segment: { flexDirection: 'row', borderRadius: 9, padding: 2 },
-  segmentItem: { height: 32, paddingHorizontal: 10, borderRadius: 7, justifyContent: 'center' },
-  segmentText: { fontSize: 12, fontWeight: '600' },
-  spacer: { flex: 1 },
-  linkButton: { height: 32, paddingHorizontal: 8, justifyContent: 'center' },
+  navButton: { width: 36, height: 44, alignItems: 'center', justifyContent: 'center' },
+  scopeRow: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 6, borderTopWidth: StyleSheet.hairlineWidth },
+  scopeLabel: { fontSize: 12, marginHorizontal: 4 },
+  scopeItem: { height: 28, paddingHorizontal: 10, borderRadius: 7, justifyContent: 'center' },
+  scopeText: { fontSize: 12 },
+  treeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 2 },
+  linkButton: { height: 32, paddingHorizontal: 6, justifyContent: 'center' },
   linkText: { fontSize: 12, fontWeight: '600' },
 });

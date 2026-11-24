@@ -31,6 +31,8 @@ export interface JsonViewerProps {
   theme?: 'light' | 'dark' | Partial<JsonViewerTheme>;
   labels?: Partial<JsonViewerLabels>;
   showLineNumbers?: boolean;
+  /** Show `0:`, `1:`… in front of array items. Default false (paths still include them). */
+  showArrayIndexes?: boolean;
   /** Longer values are cut with "…". Copy always uses the full value. Default 200. */
   maxValueLength?: number;
   rowHeight?: number;
@@ -79,6 +81,7 @@ function TreeView(props: TreeViewProps) {
     searchable = true,
     caseSensitive = false,
     showLineNumbers = true,
+    showArrayIndexes = false,
     maxValueLength = DEFAULT_MAX_VALUE_LENGTH,
     rowHeight = 24,
     indent = 14,
@@ -135,6 +138,7 @@ function TreeView(props: TreeViewProps) {
           isSelected={item.type !== 'close' && item.nodeId === selected}
           maxValueLength={maxValueLength}
           showLineNumbers={showLineNumbers}
+          showArrayIndexes={showArrayIndexes}
           lineNumberWidth={lineNumberWidth}
           indent={indent}
           rowHeight={rowHeight}
@@ -153,6 +157,7 @@ function TreeView(props: TreeViewProps) {
       selected,
       maxValueLength,
       showLineNumbers,
+      showArrayIndexes,
       lineNumberWidth,
       indent,
       rowHeight,

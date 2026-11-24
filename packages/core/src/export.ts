@@ -84,8 +84,12 @@ function queryString(url: string) {
 }
 
 /** HAR 1.2 log, readable by browser dev tools and most HTTP tools. */
-export function toHar(entries: NetworkEntry[], options: ExportOptions & { creator?: string } = {}) {
+export function toHar(entries: NetworkEntry[], options: ExportOptions & { creator?: string; maxBodyLength?: number } = {}) {
   const redact = options.redact ?? true;
+  const cut = (body: string | undefined) =>
+    body !== undefined && options.maxBodyLength !== undefined && body.length > options.maxBodyLength
+      ? `${body.slice(0, options.maxBodyLength)}…[truncated]`
+      : body;
   return {
     log: {
       version: '1.2',
@@ -108,7 +112,7 @@ export function toHar(entries: NetworkEntry[], options: ExportOptions & { creato
             headersSize: -1,
             bodySize: e.requestBody?.length ?? 0,
             ...(e.requestBody !== undefined
-              ? { postData: { mimeType: reqHeaders['Content-Type'] ?? reqHeaders['content-type'] ?? '', text: e.requestBody } }
+              ? { postData: { mimeType: reqHeaders['Content-Type'] ?? reqHeaders['content-type'] ?? '', text: cut(e.requestBody)! } }
               : {}),
           },
           response: {
@@ -120,7 +124,7 @@ export function toHar(entries: NetworkEntry[], options: ExportOptions & { creato
             content: {
               size: e.responseBody?.length ?? 0,
               mimeType: resHeaders['content-type'] ?? '',
-              text: e.responseBody ?? '',
+              text: cut(e.responseBody) ?? '',
             },
             redirectURL: '',
             headersSize: -1,

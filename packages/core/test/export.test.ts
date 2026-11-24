@@ -62,6 +62,14 @@ describe('toHar', () => {
   });
 });
 
+describe('toHar maxBodyLength', () => {
+  it('cuts long bodies', () => {
+    const har = toHar([{ ...entry, responseBody: 'x'.repeat(50) }], { maxBodyLength: 10 });
+    expect(har.log.entries[0]!.response.content.text).toBe('xxxxxxxxxx…[truncated]');
+    expect(har.log.entries[0]!.response.content.size).toBe(50);
+  });
+});
+
 describe('resend', () => {
   it('replays with fetch', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ status: 200 });

@@ -26,6 +26,7 @@ export interface JsonRowProps {
   isSelected: boolean;
   maxValueLength: number;
   showLineNumbers: boolean;
+  showArrayIndexes: boolean;
   lineNumberWidth: number;
   indent: number;
   rowHeight: number;
@@ -97,6 +98,7 @@ export const JsonRow = memo(function JsonRow(props: JsonRowProps) {
     isSelected,
     maxValueLength,
     showLineNumbers,
+    showArrayIndexes,
     lineNumberWidth,
     indent,
     rowHeight,
@@ -107,8 +109,8 @@ export const JsonRow = memo(function JsonRow(props: JsonRowProps) {
 
   const toggleable = (row.type === 'open' || row.type === 'collapsed') && node.childCount > 0;
   const isClose = row.type === 'close';
-  const keyText = isClose ? '' : formatKey(node);
   const isIndex = typeof node.key === 'number';
+  const keyText = isClose || (isIndex && !showArrayIndexes) ? '' : formatKey(node);
 
   let text: string;
   let color = theme.punctuation;

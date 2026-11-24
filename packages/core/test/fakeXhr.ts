@@ -28,10 +28,22 @@ export class FakeXHR {
   addEventListener(type: string, fn: () => void) {
     (this.listeners[type] ??= []).push(fn);
   }
+  removeEventListener(type: string, fn: () => void) {
+    this.listeners[type] = (this.listeners[type] ?? []).filter((f) => f !== fn);
+  }
   private fire(type: string) {
     for (const fn of this.listeners[type] ?? []) fn();
+    const handler = (this as unknown as Record<string, unknown>)[`on${type}`];
+    if (typeof handler === 'function') handler.call(this);
   }
+  /** Like React Native: on<type> handlers are dispatched together with listeners. */
+  dispatchEvent(event: { type: string }) {
+    this.fire(event.type);
+    return true;
+  }
+  static sent = 0;
   send(_body?: unknown) {
+    FakeXHR.sent += 1;
     const r = FakeXHR.next;
     if (r.fail) {
       this.readyState = 4;

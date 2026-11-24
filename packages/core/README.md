@@ -39,6 +39,21 @@ initNetLog({ features: { qrPairing: false } });
 | `captureStack` | `true` | Record which code sent each request |
 | `redactHeaders` | `authorization, cookie, set-cookie` | Masked when entries are sent to the desktop |
 
+## Mocks and network conditions
+
+Rules run inside `send()`, before a request leaves the app. A "respond" rule answers through the normal XMLHttpRequest interface (status, headers, body, events), so `fetch`, axios and anything else built on XHR see a real response. No native code, no private React Native APIs.
+
+```ts
+import { addMockRule, setNetworkCondition, mockRuleFromEntry, setMockStorage } from 'react-native-netlog';
+
+addMockRule({ method: 'POST', url: '*/v1/cart/*', action: { type: 'respond', status: 500, body: '{"error":"x"}' } });
+addMockRule({ method: '*', url: '/search', action: { type: 'delay', ms: 3000 } });
+addMockRule({ method: '*', url: '/profile', action: { type: 'fail', error: 'Timeout' } });
+setNetworkCondition('offline'); // 'off' | 'slow' | 'flaky' | 'offline'
+```
+
+URL patterns use `*` as a wildcard; without `*` they match any URL containing the text. The first enabled matching rule wins. Mocked requests carry `entry.mocked = { ruleId, label }`. Pass any AsyncStorage-like object to `setMockStorage` to keep rules across restarts.
+
 ## Desktop pairing
 
 ```ts

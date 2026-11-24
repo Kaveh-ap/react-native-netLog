@@ -84,6 +84,97 @@ export function SlidersIcon({ size = 22, color, background }: IconProps & { back
   );
 }
 
+/**
+ * A straight stroke between two points, given as fractions (0..1) of `size`.
+ * Positioned with transforms from the box center, so RTL can't mirror it.
+ */
+function Stroke({ size, from, to, weight, color }: { size: number; from: [number, number]; to: [number, number]; weight: number; color: string }) {
+  const dx = (to[0] - from[0]) * size;
+  const dy = (to[1] - from[1]) * size;
+  const length = Math.hypot(dx, dy) + weight;
+  const cx = ((from[0] + to[0]) / 2 - 0.5) * size;
+  const cy = ((from[1] + to[1]) / 2 - 0.5) * size;
+  return (
+    <View
+      style={[
+        styles.abs,
+        {
+          width: length,
+          height: weight,
+          borderRadius: weight / 2,
+          backgroundColor: color,
+          transform: [{ translateX: cx }, { translateY: cy }, { rotate: `${Math.atan2(dy, dx)}rad` }],
+        },
+      ]}
+    />
+  );
+}
+
+/** Lightning bolt. */
+export function BoltIcon({ size = 22, color }: IconProps) {
+  const w = Math.max(2, size / 10);
+  return (
+    <View style={[styles.box, { width: size, height: size }]} {...hidden}>
+      <Stroke size={size} from={[0.62, 0.06]} to={[0.3, 0.54]} weight={w} color={color} />
+      <Stroke size={size} from={[0.3, 0.54]} to={[0.7, 0.46]} weight={w} color={color} />
+      <Stroke size={size} from={[0.7, 0.46]} to={[0.38, 0.94]} weight={w} color={color} />
+    </View>
+  );
+}
+
+export function PauseIcon({ size = 20, color }: IconProps) {
+  const w = Math.max(2.5, size / 7);
+  const bar = { width: w, height: size * 0.62, borderRadius: w / 2, backgroundColor: color };
+  return (
+    <View style={[styles.box, styles.row, { width: size, height: size, gap: size * 0.2 }]} {...hidden}>
+      <View style={bar} />
+      <View style={bar} />
+    </View>
+  );
+}
+
+/** Outlined play triangle (strokes, not borders, so RTL can't flip it). */
+export function PlayIcon({ size = 20, color }: IconProps) {
+  const w = Math.max(2, size / 9);
+  return (
+    <View style={[styles.box, { width: size, height: size }]} {...hidden}>
+      <Stroke size={size} from={[0.3, 0.18]} to={[0.3, 0.82]} weight={w} color={color} />
+      <Stroke size={size} from={[0.3, 0.18]} to={[0.8, 0.5]} weight={w} color={color} />
+      <Stroke size={size} from={[0.3, 0.82]} to={[0.8, 0.5]} weight={w} color={color} />
+    </View>
+  );
+}
+
+export function TrashIcon({ size = 20, color }: IconProps) {
+  const w = Math.max(2, size / 10);
+  return (
+    <View style={[styles.box, { width: size, height: size }]} {...hidden}>
+      <Stroke size={size} from={[0.14, 0.24]} to={[0.86, 0.24]} weight={w} color={color} />
+      <Stroke size={size} from={[0.4, 0.12]} to={[0.6, 0.12]} weight={w} color={color} />
+      <Stroke size={size} from={[0.24, 0.32]} to={[0.3, 0.88]} weight={w} color={color} />
+      <Stroke size={size} from={[0.76, 0.32]} to={[0.7, 0.88]} weight={w} color={color} />
+      <Stroke size={size} from={[0.3, 0.88]} to={[0.7, 0.88]} weight={w} color={color} />
+      <Stroke size={size} from={[0.43, 0.42]} to={[0.43, 0.74]} weight={w * 0.8} color={color} />
+      <Stroke size={size} from={[0.57, 0.42]} to={[0.57, 0.74]} weight={w * 0.8} color={color} />
+    </View>
+  );
+}
+
+/** Arrow into a tray: export / download. */
+export function ExportIcon({ size = 20, color }: IconProps) {
+  const w = Math.max(2, size / 10);
+  return (
+    <View style={[styles.box, { width: size, height: size }]} {...hidden}>
+      <Stroke size={size} from={[0.5, 0.1]} to={[0.5, 0.62]} weight={w} color={color} />
+      <Stroke size={size} from={[0.3, 0.44]} to={[0.5, 0.64]} weight={w} color={color} />
+      <Stroke size={size} from={[0.7, 0.44]} to={[0.5, 0.64]} weight={w} color={color} />
+      <Stroke size={size} from={[0.14, 0.66]} to={[0.14, 0.88]} weight={w} color={color} />
+      <Stroke size={size} from={[0.14, 0.88]} to={[0.86, 0.88]} weight={w} color={color} />
+      <Stroke size={size} from={[0.86, 0.66]} to={[0.86, 0.88]} weight={w} color={color} />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   box: { alignItems: 'center', justifyContent: 'center' },
   abs: { position: 'absolute' },

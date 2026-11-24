@@ -105,3 +105,23 @@ export function formatStack(stack: string): string {
     })
     .join('\n');
 }
+
+/** Pretty-prints JSON text; anything else is returned unchanged. */
+export function prettyIfJson(text: string | undefined): string {
+  if (!text) return '';
+  if (!isJson(text)) return text;
+  return JSON.stringify(JSON.parse(text), null, 2);
+}
+
+/** 'empty', 'json' (valid), 'invalid' (looks like JSON but doesn't parse) or 'text'. */
+export function jsonState(text: string): 'empty' | 'json' | 'invalid' | 'text' {
+  const t = text.trim();
+  if (!t) return 'empty';
+  if (t[0] !== '{' && t[0] !== '[') return 'text';
+  try {
+    JSON.parse(t);
+    return 'json';
+  } catch {
+    return 'invalid';
+  }
+}

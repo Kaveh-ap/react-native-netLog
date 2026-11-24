@@ -2,9 +2,10 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 import { BackButton } from './BackButton';
 import { Text } from './Text';
-import { resend, toCurl, toShareText, type NetworkEntry } from 'react-native-netlog';
+import { toCurl, toShareText, type NetworkEntry } from 'react-native-netlog';
 import { Chevron, JsonViewer } from 'react-native-netlog-json-viewer';
-import { bytesText, durationText, formatStack, isJson, responseSize, statusColors, statusLabel, timeOfDay } from './format';
+import { Segmented } from './controls';
+import { bytesText, durationText, formatStack, isJson, responseSize, splitUrl, statusColors, statusLabel, timeOfDay } from './format';
 import type { NetLogLabels } from './labels';
 import type { NetLogTheme } from './theme';
 
@@ -17,6 +18,8 @@ export interface RequestDetailProps {
   theme: NetLogTheme;
   jsonTheme: 'light' | 'dark';
   labels: NetLogLabels;
+  onResend: () => void;
+  onMockThis: () => void;
 }
 
 function useFlash(): [string | null, (key: string) => void] {
@@ -84,26 +87,43 @@ function Headers({ headers, theme: t, labels }: { headers: Record<string, string
 }
 
 function Body({ text, copy, theme: t, jsonTheme, labels }: { text: string | undefined; copy: (s: string) => void; theme: NetLogTheme; jsonTheme: 'light' | 'dark'; labels: NetLogLabels }) {
+  const [raw, setRaw] = useState<boolean>(false);
   if (!text) {
     return <Text style={[styles.noBody, { color: t.muted, borderColor: t.border }]}>{labels.noBody}</Text>;
   }
-  if (isJson(text)) {
-    return (
-      <View style={[styles.flex, styles.bodyBox, { borderColor: t.border }]}>
-        <JsonViewer json={text} theme={jsonTheme} initialExpandDepth={2} onCopy={copy} />
-      </View>
-    );
-  }
+  const json = isJson(text);
+  const rawText = json && raw ? JSON.stringify(JSON.parse(text), null, 2) : text;
   return (
-    <ScrollView style={[styles.flex, styles.bodyBox, { borderColor: t.border }]} contentContainerStyle={styles.rawBody}>
-      <Text selectable style={{ color: t.text, fontFamily: t.mono, fontSize: 12 }}>
-        {text.length > 200_000 ? `${text.slice(0, 200_000)}\n…` : text}
-      </Text>
-    </ScrollView>
+    <View style={[styles.flex, styles.bodyWrap]}>
+      {json ? (
+        <View style={styles.viewToggle}>
+          <Segmented
+            options={[
+              ['tree', labels.tree],
+              ['raw', labels.raw],
+            ]}
+            value={raw ? 'raw' : 'tree'}
+            onChange={(v) => setRaw(v === 'raw')}
+            theme={t}
+          />
+        </View>
+      ) : null}
+      {json && !raw ? (
+        <View style={[styles.flex, styles.bodyBox, { borderColor: t.border }]}>
+          <JsonViewer json={text} theme={jsonTheme} initialExpandDepth={2} onCopy={copy} />
+        </View>
+      ) : (
+        <ScrollView style={[styles.flex, styles.bodyBox, { borderColor: t.border }]} contentContainerStyle={styles.rawBody}>
+          <Text selectable style={{ color: t.text, fontFamily: t.mono, fontSize: 12 }}>
+            {rawText.length > 200_000 ? `${rawText.slice(0, 200_000)}\n…` : rawText}
+          </Text>
+        </ScrollView>
+      )}
+    </View>
   );
 }
 
-export function RequestDetail({ entry: e, onBack, copy, theme: t, jsonTheme, labels }: RequestDetailProps) {
+export function RequestDetail({ entry: e, onBack, copy, theme: t, jsonTheme, labels, onResend, onMockThis }: RequestDetailProps) {
   const [tab, setTab] = useState<Tab>(e.state === 'error' || (e.status ?? 0) >= 400 ? 'response' : 'overview');
   const [flash, setFlashKey] = useFlash();
   const sc = statusColors(e, t);
@@ -122,11 +142,7 @@ export function RequestDetail({ entry: e, onBack, copy, theme: t, jsonTheme, lab
   const onShare = () => {
     Share.share({ message: toShareText(e) }).catch(() => undefined);
   };
-  const onResend = () => {
-    resend(e)
-      .then(() => setFlashKey('resend'))
-      .catch(() => setFlashKey('resend-failed'));
-  };
+  const { host } = splitUrl(e.url);
 
   const total = e.durationMs ?? 0;
   const wait = e.headersAt !== undefined ? e.headersAt - e.startedAt : total;
@@ -135,7 +151,13 @@ export function RequestDetail({ entry: e, onBack, copy, theme: t, jsonTheme, lab
 
   return (
     <View style={styles.flex}>
-      <BackButton label={labels.back} color={t.accent} onPress={onBack} />
+      <View style={styles.topBar}>
+        <BackButton label={labels.back} color={t.accent} onPress={onBack} />
+        <View style={styles.flex} />
+        <Pressable onPress={onShare} accessibilityRole="button" hitSlop={8} style={styles.topAction}>
+          <Text style={[styles.topActionText, { color: t.accent }]}>{labels.share}</Text>
+        </Pressable>
+      </View>
 
       <View style={styles.summary}>
         <View style={styles.summaryLine}>
@@ -148,7 +170,16 @@ export function RequestDetail({ entry: e, onBack, copy, theme: t, jsonTheme, lab
         <Text selectable style={[styles.url, { color: t.text, fontFamily: t.mono }]}>
           {e.url}
         </Text>
-        {e.error ? <Text style={{ color: t.error, fontSize: 13 }}>{e.error}</Text> : null}
+        <View style={styles.chips}>
+          {host ? <Text style={[styles.chip, { color: t.info, backgroundColor: t.infoBg }]}>{host}</Text> : null}
+          <Text style={[styles.chip, { color: t.neutral, backgroundColor: t.neutralBg, fontFamily: t.mono }]}>{timeOfDay(e.startedAt)}</Text>
+          {e.mocked ? (
+            <Text style={[styles.chip, { color: t.warn, backgroundColor: t.warnBg }]}>
+              {labels.mocked} · {e.mocked.label}
+            </Text>
+          ) : null}
+          {e.error ? <Text style={[styles.chip, { color: t.error, backgroundColor: t.errorBg }]}>{e.error}</Text> : null}
+        </View>
       </View>
 
       <View style={[styles.tabs, { backgroundColor: t.surfaceAlt }]} accessibilityRole="tablist">
@@ -239,13 +270,11 @@ export function RequestDetail({ entry: e, onBack, copy, theme: t, jsonTheme, lab
         <Pressable onPress={onCopyCurl} accessibilityRole="button" style={[styles.action, { borderColor: t.border }]}>
           <Text style={[styles.actionText, { color: t.text }]}>{flash === 'curl' ? labels.copied : labels.copyCurl}</Text>
         </Pressable>
-        <Pressable onPress={onShare} accessibilityRole="button" style={[styles.action, { borderColor: t.border }]}>
-          <Text style={[styles.actionText, { color: t.text }]}>{labels.share}</Text>
-        </Pressable>
         <Pressable onPress={onResend} accessibilityRole="button" style={[styles.action, { borderColor: t.border }]}>
-          <Text style={[styles.actionText, { color: flash === 'resend-failed' ? t.error : t.text }]}>
-            {flash === 'resend' ? labels.resent : labels.resend}
-          </Text>
+          <Text style={[styles.actionText, { color: t.text }]}>{labels.resend}</Text>
+        </Pressable>
+        <Pressable onPress={onMockThis} accessibilityRole="button" style={[styles.action, { borderColor: t.primary, backgroundColor: t.primary }]}>
+          <Text style={[styles.actionText, { color: t.onPrimary }]}>{labels.mockThis}</Text>
         </Pressable>
       </View>
     </View>
@@ -255,6 +284,13 @@ export function RequestDetail({ entry: e, onBack, copy, theme: t, jsonTheme, lab
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   summary: { paddingHorizontal: 16, paddingBottom: 12, gap: 6 },
+  topBar: { flexDirection: 'row', alignItems: 'center' },
+  topAction: { height: 44, justifyContent: 'center', paddingHorizontal: 16 },
+  topActionText: { fontSize: 15, fontWeight: '600' },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start', gap: 6 },
+  chip: { fontSize: 12, fontWeight: '600', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, overflow: 'hidden' },
+  bodyWrap: { gap: 8 },
+  viewToggle: { width: 160 },
   summaryLine: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   method: { fontSize: 13, fontWeight: '700' },
   status: { fontSize: 12, fontWeight: '700', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, overflow: 'hidden' },

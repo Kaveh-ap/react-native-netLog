@@ -2,6 +2,7 @@ import { memo, useCallback, useMemo, useState } from 'react';
 import {
   FlatList,
   Pressable,
+  ScrollView,
   StyleSheet,
   TextInput,
   View,
@@ -24,17 +25,18 @@ import {
 import type { NetLogLabels } from './labels';
 import type { NetLogTheme } from './theme';
 
-type Filter = 'all' | 'errors' | 'slow' | 'pending';
+type Filter = 'all' | 'errors' | 'slow' | 'pending' | 'mocked';
 
 const ROW_HEIGHT = 60;
 
 interface RowProps {
   entry: NetworkEntry;
   theme: NetLogTheme;
+  mockLabel: string;
   onPress: (id: number) => void;
 }
 
-const Row = memo(function Row({ entry, theme: t, onPress }: RowProps) {
+const Row = memo(function Row({ entry, theme: t, mockLabel, onPress }: RowProps) {
   const { host, path } = splitUrl(entry.url);
   const op = graphqlOperation(entry);
   const sc = statusColors(entry, t);
@@ -62,6 +64,7 @@ const Row = memo(function Row({ entry, theme: t, onPress }: RowProps) {
             {host}
             {entry.error ? ` · ${entry.error}` : ''}
           </Text>
+          {entry.mocked ? <Text style={[styles.mock, { color: t.warn, backgroundColor: t.warnBg }]}>{mockLabel}</Text> : null}
         </View>
       </View>
       <View style={styles.rowSide}>
@@ -89,6 +92,7 @@ export function RequestList({ entries, onSelect, theme: t, labels }: RequestList
       errors: entries.filter(isError).length,
       slow: entries.filter(isSlow).length,
       pending: entries.filter(isPending).length,
+      mocked: entries.filter((e) => !!e.mocked).length,
     }),
     [entries],
   );
@@ -101,6 +105,7 @@ export function RequestList({ entries, onSelect, theme: t, labels }: RequestList
       if (filter === 'errors' && !isError(e)) continue;
       if (filter === 'slow' && !isSlow(e)) continue;
       if (filter === 'pending' && !isPending(e)) continue;
+      if (filter === 'mocked' && !e.mocked) continue;
       if (q && !`${e.method} ${e.status ?? ''} ${e.url} ${graphqlOperation(e) ?? ''}`.toLowerCase().includes(q)) continue;
       out.push(e);
     }
@@ -108,8 +113,8 @@ export function RequestList({ entries, onSelect, theme: t, labels }: RequestList
   }, [entries, query, filter]);
 
   const renderItem = useCallback(
-    ({ item }: ListRenderItemInfo<NetworkEntry>) => <Row entry={item} theme={t} onPress={onSelect} />,
-    [t, onSelect],
+    ({ item }: ListRenderItemInfo<NetworkEntry>) => <Row entry={item} theme={t} mockLabel={labels.mocked} onPress={onSelect} />,
+    [t, onSelect, labels.mocked],
   );
 
   const chips: Array<[Filter, string]> = [
@@ -117,6 +122,7 @@ export function RequestList({ entries, onSelect, theme: t, labels }: RequestList
     ['errors', labels.filterErrors],
     ['slow', labels.filterSlow],
     ['pending', labels.filterPending],
+    ['mocked', labels.filterMocked],
   ];
 
   return (
@@ -137,7 +143,7 @@ export function RequestList({ entries, onSelect, theme: t, labels }: RequestList
         />
         </View>
       </View>
-      <View style={styles.chips} accessibilityRole="tablist">
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll} contentContainerStyle={styles.chips} accessibilityRole="tablist">
         {chips.map(([id, label]) => {
           const on = filter === id;
           return (
@@ -154,7 +160,7 @@ export function RequestList({ entries, onSelect, theme: t, labels }: RequestList
             </Pressable>
           );
         })}
-      </View>
+      </ScrollView>
       <FlatList
         data={visible}
         keyExtractor={(e) => String(e.id)}
@@ -178,7 +184,8 @@ const styles = StyleSheet.create({
   searchWrap: { paddingHorizontal: 16, paddingBottom: 8 },
   searchBox: { height: 44, borderRadius: 12, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 8 },
   search: { flex: 1, height: 44, fontSize: 14, paddingVertical: 0 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 16, paddingBottom: 10 },
+  chipsScroll: { flexGrow: 0 },
+  chips: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingBottom: 10 },
   chip: { height: 32, paddingHorizontal: 12, borderRadius: 16, justifyContent: 'center' },
   chipText: { fontSize: 13, fontWeight: '500' },
   listTop: { borderTopWidth: StyleSheet.hairlineWidth },
@@ -196,6 +203,7 @@ const styles = StyleSheet.create({
   path: { flex: 1, fontSize: 13 },
   methodSpacer: { width: 42 },
   host: { flex: 1, fontSize: 12 },
+  mock: { fontSize: 10, fontWeight: '700', paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4, overflow: 'hidden' },
   rowSide: { alignItems: 'flex-end', gap: 4 },
   status: { minWidth: 38, textAlign: 'center', fontSize: 12, fontWeight: '700', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, overflow: 'hidden' },
   time: { fontSize: 12, fontVariant: ['tabular-nums'] },

@@ -4,8 +4,8 @@ A network inspector for React Native apps, in plain JavaScript: no native module
 
 | Package | What it is |
 |---|---|
-| [`react-native-netlog`](packages/core) | Records requests (XMLHttpRequest, so `fetch` and axios too), keeps them in one shared store, and optionally pairs with the desktop |
-| [`react-native-netlog-ui`](packages/ui) | The in-app inspector: request list, details with JSON viewer, cURL/HAR/share/resend, optional desktop pairing |
+| [`react-native-netlog`](packages/core) | Records requests (XMLHttpRequest, so `fetch` and axios too), mock rules and network conditions, cURL/HAR export, optional desktop pairing |
+| [`react-native-netlog-ui`](packages/ui) | The in-app inspector: Requests, Mocks and Settings tabs, request details with JSON viewer, edit & resend, floating bubble |
 | [`react-native-netlog-json-viewer`](packages/json-viewer) | Fast, searchable JSON tree viewer |
 | [`react-native-netlog-desktop`](packages/desktop) | `npx netlog-desktop`: shows a pairing QR code and a live traffic viewer in the browser |
 

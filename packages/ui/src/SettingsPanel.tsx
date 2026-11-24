@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { getConfig, type DeviceInfo } from 'react-native-netlog';
 import { DesktopPairing, type ScannerProps } from './DesktopPairing';
 import { bytesText } from './format';
+import { RESOURCE_TYPES } from './hiddenTypes';
 import type { NetLogLabels } from './labels';
 import { Text } from './Text';
 import type { NetLogTheme } from './theme';
@@ -20,6 +21,8 @@ export interface SettingsPanelProps {
   pairingEnabled: boolean;
   renderScanner?: (props: ScannerProps) => ReactNode;
   device?: DeviceInfo;
+  hidden: ReadonlySet<string>;
+  onHiddenChange: (ids: string[]) => void;
 }
 
 function Section({ title, children, theme: t }: { title: string; children: ReactNode; theme: NetLogTheme }) {
@@ -101,6 +104,40 @@ export function SettingsPanel(p: SettingsPanelProps) {
         </Row>
       </Section>
 
+      <Section title={p.labels.hideFromList} theme={t}>
+        <View style={styles.typesBox}>
+          <View style={styles.chips}>
+            {RESOURCE_TYPES.map((type) => {
+              const on = p.hidden.has(type.id);
+              const next = new Set(p.hidden);
+              if (on) next.delete(type.id);
+              else next.add(type.id);
+              return (
+                <Pressable
+                  key={type.id}
+                  onPress={() => p.onHiddenChange([...next])}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: on }}
+                  accessibilityLabel={`${p.labels.hideFromList}: ${type.label}`}
+                  style={[styles.chip, { backgroundColor: on ? t.primary : t.surfaceAlt }]}
+                >
+                  <Text style={[styles.chipText, { color: on ? t.onPrimary : t.text }]}>{type.label}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+          <View style={styles.typeActions}>
+            <SmallButton
+              label={p.labels.hideImages}
+              onPress={() => p.onHiddenChange([...new Set([...p.hidden, ...RESOURCE_TYPES.filter((r) => r.image).map((r) => r.id)])])}
+              theme={t}
+            />
+            <SmallButton label={p.labels.showAll} onPress={() => p.onHiddenChange([])} theme={t} />
+          </View>
+          <Text style={[styles.hint, { color: t.muted }]}>{p.labels.hideHint}</Text>
+        </View>
+      </Section>
+
       <Section title={p.labels.exportTitle} theme={t}>
         <Row theme={t} last>
           <Text style={[styles.rowText, styles.hint, { color: t.muted }]}>{p.labels.exportHint}</Text>
@@ -156,6 +193,11 @@ const styles = StyleSheet.create({
   dot: { width: 8, height: 8, borderRadius: 4 },
   smallButton: { height: 36, paddingHorizontal: 14, borderRadius: 9, justifyContent: 'center' },
   smallButtonText: { fontSize: 13, fontWeight: '600' },
+  typesBox: { padding: 12, gap: 12 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: { height: 34, paddingHorizontal: 12, borderRadius: 17, justifyContent: 'center' },
+  chipText: { fontSize: 13, fontWeight: '600' },
+  typeActions: { flexDirection: 'row', gap: 8 },
   segment: { flex: 1, flexDirection: 'row', padding: 3, borderRadius: 10 },
   segmentItem: { flex: 1, height: 36, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   segmentText: { fontSize: 13, fontWeight: '600' },

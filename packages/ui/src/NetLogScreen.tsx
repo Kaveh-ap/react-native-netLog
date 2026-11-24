@@ -9,14 +9,19 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { Text } from './Text';
-import { clearEntries, toHar, type DeviceInfo } from 'react-native-netlog';
+import { clearEntries, getEntries, mockRuleFromEntry, toHar, type DeviceInfo, type MockRuleInput } from 'react-native-netlog';
+
+const getEntryById = (id: number) => getEntries().find((e) => e.id === id);
 import type { ScannerProps } from './DesktopPairing';
 import { isError } from './format';
+import { initHiddenTypes, resourceTypeOf, setHiddenTypes, useHiddenTypes } from './hiddenTypes';
 import { useNetLogFeature } from './hooks';
 import { defaultLabels, type NetLogLabels } from './labels';
 import { RequestDetail } from './RequestDetail';
 import { RequestList } from './RequestList';
-import { CloseIcon, ListIcon, MoonIcon, SlidersIcon, SunIcon } from './Icons';
+import { BoltIcon, CloseIcon, ExportIcon, ListIcon, PauseIcon, PlayIcon, SlidersIcon, TrashIcon } from './Icons';
+import { MocksPanel } from './MocksPanel';
+import { ResendEditor } from './ResendEditor';
 import { SettingsPanel } from './SettingsPanel';
 import { netLogDark, netLogLight, type NetLogTheme } from './theme';
 import { useEntries, usePaused } from './useEntries';
@@ -38,21 +43,43 @@ export interface NetLogScreenProps {
   renderScanner?: (props: ScannerProps) => ReactNode;
   /** Device info shown on the desktop when paired. */
   device?: DeviceInfo;
+  /**
+   * Resource types hidden from the list at first (e.g. ['webp', 'gif', 'svg']).
+   * Users can change it in Settings. Ids: webp, gif, svg, png, jpeg, avif, ico, font, video, audio.
+   */
+  hiddenTypes?: string[];
+  /** Open this request's details first (e.g. from NetLogBubble's error toast). */
+  initialEntryId?: number;
   style?: StyleProp<ViewStyle>;
 }
 
-type Tab = 'requests' | 'settings';
-type View_ = { name: 'list' } | { name: 'detail'; id: number };
+const SHARE_LIMIT = 400_000;
 
-function HeaderButton({ label, onPress, theme: t, active }: { label: string; onPress: () => void; theme: NetLogTheme; active?: boolean }) {
+type Tab = 'requests' | 'mocks' | 'settings';
+type View_ = { name: 'list' } | { name: 'detail'; id: number } | { name: 'resend'; id: number };
+
+function IconButton({
+  label,
+  onPress,
+  theme: t,
+  active,
+  children,
+}: {
+  label: string;
+  onPress: () => void;
+  theme: NetLogTheme;
+  active?: boolean;
+  children: ReactNode;
+}) {
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
+      accessibilityLabel={label}
       hitSlop={4}
-      style={[styles.headerButton, { backgroundColor: active ? t.warnBg : t.surfaceAlt }]}
+      style={({ pressed }) => [styles.iconButton, { backgroundColor: active ? t.warnBg : pressed ? t.surfaceAlt : 'transparent' }]}
     >
-      <Text style={[styles.headerButtonText, { color: active ? t.warn : t.text }]}>{label}</Text>
+      {children}
     </Pressable>
   );
 }
@@ -76,12 +103,22 @@ export function NetLogScreen(props: NetLogScreenProps) {
     },
     [onThemeChange],
   );
-  const toggleMode = useCallback(() => changeMode(mode === 'dark' ? 'light' : 'dark'), [mode, changeMode]);
   const labels = useMemo(() => ({ ...defaultLabels, ...props.labels }), [props.labels]);
-  const entries = useEntries();
+  const allEntries = useEntries();
+  initHiddenTypes(props.hiddenTypes);
+  const hidden = useHiddenTypes();
+  const entries = useMemo(
+    () => (hidden.size ? allEntries.filter((e) => !hidden.has(resourceTypeOf(e) ?? '')) : allEntries),
+    [allEntries, hidden],
+  );
+  const hiddenCount = allEntries.length - entries.length;
   const [paused, setPaused] = usePaused();
-  const [view, setView] = useState<View_>({ name: 'list' });
+  const [view, setView] = useState<View_>(() =>
+    props.initialEntryId !== undefined ? { name: 'detail', id: props.initialEntryId } : { name: 'list' },
+  );
   const [tab, setTab] = useState<Tab>('requests');
+  const [editingRule, setEditingRule] = useState<string | null>(null);
+  const [ruleDraft, setRuleDraft] = useState<MockRuleInput | null>(null);
   const pairingEnabled = useNetLogFeature('qrPairing');
   const { onCopy } = props;
 
@@ -96,22 +133,39 @@ export function NetLogScreen(props: NetLogScreenProps) {
   const goList = useCallback(() => setView({ name: 'list' }), []);
   const select = useCallback((id: number) => setView({ name: 'detail', id }), []);
 
-  const inDetail = view.name === 'detail' && tab === 'requests';
+  const inDetail = view.name !== 'list' && tab === 'requests';
+  const inSubScreen = inDetail || (tab === 'mocks' && editingRule !== null);
   useEffect(() => {
-    if (!inDetail && tab === 'requests') return undefined;
+    if (!inSubScreen && tab === 'requests') return undefined;
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (inDetail) goList();
+      if (view.name === 'resend' && tab === 'requests') setView({ name: 'detail', id: view.id });
+      else if (inDetail) goList();
+      else if (tab === 'mocks' && editingRule !== null) setEditingRule(null);
       else setTab('requests');
       return true;
     });
     return () => sub.remove();
-  }, [inDetail, tab, goList]);
+  }, [inSubScreen, inDetail, tab, view, editingRule, goList]);
+
+  const mockThis = useCallback((id: number) => {
+    const e = getEntryById(id);
+    if (!e) return;
+    setRuleDraft(mockRuleFromEntry(e));
+    setEditingRule('new');
+    setTab('mocks');
+  }, []);
 
   const errors = useMemo(() => entries.filter(isError).length, [entries]);
-  const detailEntry = view.name === 'detail' ? entries.find((e) => e.id === view.id) : undefined;
+  const detailEntry = view.name !== 'list' ? allEntries.find((e) => e.id === view.id) : undefined;
 
   const shareHar = () => {
-    Share.share({ message: JSON.stringify(toHar(entries)) }).catch(() => undefined);
+    // Android can't pass much more than ~1 MB to the share sheet; shrink bodies until it fits.
+    let message = JSON.stringify(toHar(allEntries));
+    for (const limit of [20_000, 2_000, 0]) {
+      if (message.length <= SHARE_LIMIT) break;
+      message = JSON.stringify(toHar(allEntries, { maxBodyLength: limit }));
+    }
+    Share.share({ message }).catch(() => undefined);
   };
 
   let body: ReactNode;
@@ -124,12 +178,38 @@ export function NetLogScreen(props: NetLogScreenProps) {
         labels={labels}
         paused={paused}
         onPausedChange={setPaused}
-        storedCount={entries.length}
+        storedCount={allEntries.length}
+        hidden={hidden}
+        onHiddenChange={setHiddenTypes}
         onClear={clearEntries}
         onShareHar={shareHar}
         pairingEnabled={pairingEnabled}
         renderScanner={props.renderScanner}
         device={props.device}
+      />
+    );
+  } else if (tab === 'mocks') {
+    body = (
+      <MocksPanel
+        theme={t}
+        labels={labels}
+        editing={editingRule}
+        onEdit={(id) => {
+          setEditingRule(id);
+          if (id !== 'new') setRuleDraft(null);
+        }}
+        draft={ruleDraft}
+      />
+    );
+  } else if (view.name === 'resend' && detailEntry) {
+    body = (
+      <ResendEditor
+        key={`resend-${detailEntry.id}`}
+        entry={detailEntry}
+        onBack={() => setView({ name: 'detail', id: detailEntry.id })}
+        onOpenEntry={select}
+        theme={t}
+        labels={labels}
       />
     );
   } else if (inDetail && detailEntry) {
@@ -142,6 +222,8 @@ export function NetLogScreen(props: NetLogScreenProps) {
         theme={t}
         jsonTheme={jsonTheme}
         labels={labels}
+        onResend={() => setView({ name: 'resend', id: detailEntry.id })}
+        onMockThis={() => mockThis(detailEntry.id)}
       />
     );
   } else {
@@ -155,29 +237,30 @@ export function NetLogScreen(props: NetLogScreenProps) {
               </Text>
               <Text style={[styles.subtitle, { color: t.muted }]}>{labels.summary(entries.length, errors)}</Text>
             </View>
-            <Pressable
-              onPress={toggleMode}
-              accessibilityRole="button"
-              accessibilityLabel={mode === 'dark' ? labels.lightMode : labels.darkMode}
-              hitSlop={8}
-              style={styles.close}
-            >
-              {mode === 'dark' ? <SunIcon color={t.text} /> : <MoonIcon color={t.text} background={t.background} />}
-            </Pressable>
+            <IconButton label={paused ? labels.resume : labels.pause} onPress={() => setPaused(!paused)} theme={t} active={paused}>
+              {paused ? <PlayIcon color={t.warn} /> : <PauseIcon color={t.text} />}
+            </IconButton>
+            <IconButton label={labels.clear} onPress={clearEntries} theme={t}>
+              <TrashIcon color={t.text} />
+            </IconButton>
+            <IconButton label={labels.exportHar} onPress={shareHar} theme={t}>
+              <ExportIcon color={t.text} />
+            </IconButton>
             {props.onClose ? (
               <Pressable onPress={props.onClose} accessibilityRole="button" accessibilityLabel={labels.close} hitSlop={8} style={styles.close}>
                 <CloseIcon color={t.text} />
               </Pressable>
             ) : null}
           </View>
-          <View style={styles.headerButtons}>
-            <HeaderButton label={paused ? labels.resume : labels.pause} onPress={() => setPaused(!paused)} theme={t} active={paused} />
-            <HeaderButton label={labels.clear} onPress={clearEntries} theme={t} />
-            <HeaderButton label={labels.exportHar} onPress={shareHar} theme={t} />
-          </View>
         </View>
         {paused ? (
           <Text style={[styles.paused, { color: t.warn, backgroundColor: t.warnBg }]}>{labels.paused}</Text>
+        ) : null}
+        {hiddenCount > 0 ? (
+          <Pressable onPress={() => setTab('settings')} accessibilityRole="button" style={styles.hiddenNote}>
+            <Text style={[styles.hiddenNoteText, { color: t.muted }]}>{labels.hiddenNote(hiddenCount)}</Text>
+            <Text style={[styles.hiddenNoteText, { color: t.accent }]}>{labels.tabSettings}</Text>
+          </Pressable>
         ) : null}
         <RequestList entries={entries} onSelect={select} theme={t} labels={labels} />
       </View>
@@ -186,13 +269,14 @@ export function NetLogScreen(props: NetLogScreenProps) {
 
   const tabs: Array<[Tab, string]> = [
     ['requests', labels.tabRequests],
+    ['mocks', labels.tabMocks],
     ['settings', labels.tabSettings],
   ];
 
   return (
     <View style={[styles.root, { backgroundColor: t.background }, props.style]}>
       <View style={styles.flex}>{body}</View>
-      {inDetail && detailEntry ? null : (
+      {inSubScreen && (tab !== 'requests' || detailEntry) ? null : (
         <View style={[styles.tabBar, { borderTopColor: t.separator, backgroundColor: t.surface }]} accessibilityRole="tablist">
           {tabs.map(([id, label]) => {
             const on = tab === id;
@@ -206,7 +290,13 @@ export function NetLogScreen(props: NetLogScreenProps) {
                 accessibilityLabel={label}
                 style={styles.tabItem}
               >
-                {id === 'requests' ? <ListIcon color={color} /> : <SlidersIcon color={color} background={t.surface} />}
+                {id === 'requests' ? (
+                  <ListIcon color={color} />
+                ) : id === 'mocks' ? (
+                  <BoltIcon color={color} />
+                ) : (
+                  <SlidersIcon color={color} background={t.surface} />
+                )}
                 <Text style={[styles.tabLabel, { color, fontWeight: on ? '700' : '500' }]}>{label}</Text>
               </Pressable>
             );
@@ -222,15 +312,15 @@ const styles = StyleSheet.create({
   root: { flex: 1, direction: 'ltr' },
   flex: { flex: 1 },
   header: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 10, gap: 10 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  iconButton: { width: 42, height: 42, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 20, fontWeight: '700' },
   subtitle: { fontSize: 12, marginTop: 2 },
   close: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
-  headerButtons: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  headerButton: { height: 34, paddingHorizontal: 12, borderRadius: 9, justifyContent: 'center' },
-  headerButtonText: { fontSize: 13, fontWeight: '600' },
   paused: { marginHorizontal: 16, marginBottom: 8, padding: 10, borderRadius: 10, fontSize: 13 },
   tabBar: { flexDirection: 'row', borderTopWidth: 1 },
+  hiddenNote: { flexDirection: 'row', gap: 6, paddingHorizontal: 16, paddingBottom: 8 },
+  hiddenNoteText: { fontSize: 12 },
   tabItem: { flex: 1, height: 58, alignItems: 'center', justifyContent: 'center', gap: 3 },
   tabLabel: { fontSize: 11, textAlign: 'center' },
 });

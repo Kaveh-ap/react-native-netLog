@@ -23,6 +23,8 @@ export interface NetworkEntry {
   error?: string;
   /** JS stack at send() time, when `captureStack` is on. */
   initiator?: string;
+  /** Set when a mock rule or network condition changed this request. */
+  mocked?: { ruleId?: string; label: string };
 }
 
 export type StoreEvent =
