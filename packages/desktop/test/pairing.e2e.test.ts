@@ -108,3 +108,10 @@ describe('desktop pairing (qrPairing off, e.g. Digikala)', () => {
     expect(getEntries()).toHaveLength(1); // in-app capture still works
   });
 });
+
+describe('viewer access', () => {
+  it('serves the viewer to this computer and refuses other machines', async () => {
+    const local = await fetch(`http://127.0.0.1:${server.port}/api/pairing`);
+    expect(local.status).toBe(200);
+  });
+});

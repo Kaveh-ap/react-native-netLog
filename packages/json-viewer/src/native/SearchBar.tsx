@@ -87,7 +87,7 @@ export function SearchBar(props: Props) {
             style={[styles.input, { color: theme.text, fontFamily: theme.fontFamily }]}
           />
           {countText ? (
-            <Text style={[styles.count, { color: theme.muted }]} accessibilityLiveRegion="polite">
+            <Text style={[styles.count, { color: theme.muted }]} numberOfLines={1} accessibilityLiveRegion="polite">
               {countText}
             </Text>
           ) : null}
@@ -153,8 +153,8 @@ const styles = StyleSheet.create({
   searchBox: { borderRadius: 12, overflow: 'hidden' },
   inputRow: { flexDirection: 'row', alignItems: 'center', height: 44, gap: 2 },
   iconBox: { width: 36, alignItems: 'center', justifyContent: 'center' },
-  input: { flex: 1, fontSize: 14, paddingVertical: 0 },
-  count: { fontSize: 12, fontVariant: ['tabular-nums'] },
+  input: { flex: 1, minWidth: 0, fontSize: 14, paddingVertical: 0 },
+  count: { flexShrink: 0, fontSize: 12 },
   navButton: { width: 36, height: 44, alignItems: 'center', justifyContent: 'center' },
   scopeRow: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 6, borderTopWidth: StyleSheet.hairlineWidth },
   scopeLabel: { fontSize: 12, marginHorizontal: 4 },

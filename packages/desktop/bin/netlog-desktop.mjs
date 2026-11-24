@@ -7,7 +7,7 @@ function arg(name, fallback) {
 }
 
 if (process.argv.includes('--help')) {
-  console.log(`netlog-desktop [--port 9099] [--token 1234-5678] [--name "My Mac"]
+  console.log(`netlog-desktop [--port 9099] [--token 1234-5678] [--name "My Mac"] [--allow-remote-viewer]
 
 Shows a pairing QR code and serves a live viewer of your app's traffic.`);
   process.exit(0);
@@ -17,6 +17,7 @@ const server = await startServer({
   port: Number(arg('port', 9099)),
   token: arg('token'),
   name: arg('name'),
+  allowRemoteViewer: process.argv.includes('--allow-remote-viewer'),
 });
 const p = server.pairing();
 

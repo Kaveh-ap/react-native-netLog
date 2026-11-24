@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NetLog</title>
+<style>
+:root{
+  --bg:#F9FAFB;--surface:#FFFFFF;--surface2:#F2F4F7;--border:#EAECF0;--text:#101828;--muted:#475467;--faint:#98A2B3;
+  --accent:#175CD3;--sel:#EFF4FF;--ok:#067647;--okbg:#ECFDF3;--warn:#B54708;--warnbg:#FFFAEB;--err:#B42318;--errbg:#FEF3F2;
+  --info:#175CD3;--infobg:#EFF8FF;--mock:#B54708;--mockbg:#FFFAEB;--primary:#101828;--onprimary:#FFFFFF;
+  --get:#175CD3;--post:#6941C6;--put:#B54708;--delete:#B42318;
+  --jkey:#344054;--jstr:#067647;--jnum:#175CD3;--jbool:#6941C6;--wf:#2E90FA;--wferr:#D92D20;--wfwarn:#F79009;--wfpend:#98A2B3;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0C111D;--surface:#161B26;--surface2:#1F242F;--border:#1F242F;--text:#F5F5F6;--muted:#94969C;--faint:#61646C;
+  --accent:#84ADFF;--sel:#102A56;--ok:#75E0A7;--okbg:#053321;--warn:#FEC84B;--warnbg:#4E1D09;--err:#FDA29B;--errbg:#55160C;
+  --info:#84CAFF;--infobg:#102A56;--mock:#FEC84B;--mockbg:#4E1D09;--primary:#F5F5F6;--onprimary:#0C111D;
+  --get:#84CAFF;--post:#BDB4FE;--put:#FEC84B;--delete:#FDA29B;
+  --jkey:#CECFD2;--jstr:#75E0A7;--jnum:#84CAFF;--jbool:#BDB4FE;--wf:#528BFF;--wferr:#F97066;--wfwarn:#FDB022;--wfpend:#61646C;
+}}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+header{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+.logo{width:30px;height:30px;border-radius:8px;background:var(--primary);display:flex;align-items:center;justify-content:center}
+.logo i{display:block;width:14px;height:2px;border-radius:1px;background:var(--onprimary);box-shadow:0 -5px 0 var(--onprimary),0 5px 0 var(--onprimary)}
+.devices{display:flex;gap:8px;flex-wrap:wrap}
+.device{display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border:1px solid var(--border);border-radius:8px;font-size:13px}
+.device .dot{width:8px;height:8px;border-radius:4px;background:var(--faint)}.device .dot.on{background:#17B26A}
+.device small{color:var(--muted)}
+.muted{color:var(--muted)}.grow{flex:1}
+.btn{height:36px;padding:0 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface);font-weight:600;font-size:13px}
+.btn:hover{background:var(--surface2)}.btn.primary{background:var(--primary);color:var(--onprimary);border-color:var(--primary)}.btn.warn{background:var(--warnbg);color:var(--warn);border-color:transparent}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border)}
+.search{flex:1 1 260px;max-width:440px;display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;background:var(--surface2);border-radius:9px;color:var(--muted)}
+.search input{flex:1;min-width:0;border:0;background:transparent;outline:none;font-size:13px;color:var(--text)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{height:30px;padding:0 12px;border:0;border-radius:15px;background:var(--surface2);font-size:13px;font-weight:500}
+.chip b{font-weight:500;color:var(--muted);margin-left:4px}.chip.on{background:var(--primary);color:var(--onprimary)}.chip.on b{color:inherit;opacity:.75}
+#pair{margin:14px 20px 0;border:1px dashed var(--border);border-radius:14px;background:var(--surface)}
+#pairToggle{display:flex;align-items:center;gap:12px;width:100%;min-height:46px;padding:10px 16px;border:0;border-radius:14px;background:none;text-align:left}
+#pairToggle .chev{margin-left:auto;transition:transform .15s;color:var(--muted)}#pairToggle[aria-expanded="true"] .chev{transform:rotate(180deg)}
+#pairTitle{font-weight:600}#pairBody{display:flex;gap:24px;align-items:center;flex-wrap:wrap;padding:6px 22px 22px}#pairBody[hidden]{display:none}
+#qr{width:208px;height:208px;background:#fff;border-radius:12px;padding:8px}
+code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface2);padding:2px 6px;border-radius:6px}
+main{flex:1;min-height:0;display:flex;flex-wrap:wrap;margin-top:14px;border-top:1px solid var(--border)}
+#list{flex:999 1 640px;min-width:0;overflow:auto;background:var(--surface);border-right:1px solid var(--border);max-height:calc(100vh - 170px)}
+#detail{flex:1 1 400px;min-width:0;background:var(--surface);display:flex;flex-direction:column;max-height:calc(100vh - 170px)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{position:sticky;top:0;z-index:1;background:var(--surface2);text-align:left;color:var(--muted);font-weight:600;font-size:12px;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap;vertical-align:middle}
+tr{cursor:pointer}tbody tr:hover{background:var(--surface2)}tr.sel,tr.sel:hover{background:var(--sel)}tr.errrow{background:color-mix(in srgb,var(--errbg) 45%,transparent)}
+td.path{width:100%;max-width:0}
+.path b{display:block;overflow:hidden;text-overflow:ellipsis;font:500 12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.path small{display:block;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:11.5px}
+.method{font:700 11.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.m-GET{color:var(--get)}.m-POST{color:var(--post)}.m-PUT,.m-PATCH{color:var(--put)}.m-DELETE{color:var(--delete)}
+.pill{display:inline-block;min-width:36px;text-align:center;padding:1px 6px;border-radius:6px;font:700 11.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+.s2{color:var(--ok);background:var(--okbg)}.s3,.s1,.s0{color:var(--muted);background:var(--surface2)}.s4{color:var(--warn);background:var(--warnbg)}.s5,.serr{color:var(--err);background:var(--errbg)}
+.tag{display:inline-block;margin-left:6px;padding:0 5px;border-radius:4px;font-size:10px;font-weight:700;color:var(--mock);background:var(--mockbg);vertical-align:1px}
+.num{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}.slow{color:var(--warn)}
+.wf{width:150px}.wft{position:relative;height:8px;border-radius:4px;background:var(--surface2)}.wfb{position:absolute;top:0;bottom:0;border-radius:4px;background:var(--wf)}
+.empty{padding:48px;text-align:center;color:var(--muted)}
+#dhead{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+#dhead .line{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#dhead .url{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}
+.chipline{display:flex;gap:6px;flex-wrap:wrap}.c{font-size:12px;font-weight:600;padding:2px 8px;border-radius:6px;background:var(--surface2);color:var(--muted)}.c.info{background:var(--infobg);color:var(--info)}.c.mock{background:var(--mockbg);color:var(--mock)}.c.err{background:var(--errbg);color:var(--err)}
+.tabs{display:flex;gap:4px;padding:6px 14px 0;border-bottom:1px solid var(--border)}
+.tabs button{height:38px;padding:0 10px;border:0;border-bottom:2px solid transparent;background:none;color:var(--muted);font-weight:600;font-size:13px}.tabs button.on{border-color:var(--text);color:var(--text)}
+#body{flex:1;overflow:auto;padding:14px 18px}
+pre{margin:0;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-word}
+.k{color:var(--jkey)}.s{color:var(--jstr)}.n{color:var(--jnum)}.b{color:var(--jbool)}
+.kv{display:grid;grid-template-columns:minmax(120px,32%) 1fr;gap:6px 14px;font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;margin:0 0 18px}
+.kv dt{color:var(--muted);word-break:break-all}.kv dd{margin:0;word-break:break-all}
+h4{margin:0 0 8px;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.timing{display:flex;flex-direction:column;gap:14px;max-width:520px}.timing .row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}.timing .wft{height:10px}
+@media (max-width:720px){header,.bar{padding-left:12px;padding-right:12px}#pair{margin:12px}.wf,.col-size{display:none}#list,#detail{max-height:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="logo" aria-hidden="true"><i></i></span>NetLog</div>
+  <div id="devices" class="devices"><span class="muted">No device connected</span></div>
+  <span class="grow"></span>
+  <button id="pause" class="btn" type="button">Pause</button>
+  <button id="clear" class="btn" type="button">Clear</button>
+  <button id="har" class="btn primary" type="button">Export HAR</button>
+</header>
+<div class="bar">
+  <label class="search"><span aria-hidden="true">⌕</span><input id="q" type="search" placeholder="Filter by URL, method or status" aria-label="Filter requests"></label>
+  <div id="chips" class="chips" role="tablist"></div>
+  <span class="grow"></span>
+  <span id="summary" class="muted" style="font-size:12px"></span>
+</div>
+<section id="pair">
+  <button id="pairToggle" type="button" aria-expanded="true" aria-controls="pairBody">
+    <span id="pairTitle">Pair a device</span><span id="pairSummary" class="muted mono" style="font-size:12px"></span><span class="chev" aria-hidden="true">▾</span>
+  </button>
+  <div id="pairBody">
+    <img id="qr" alt="Pairing QR code">
+    <div style="max-width:520px">
+      <p class="muted" style="margin:0 0 12px">In your app open NetLog → <b>Settings → Desktop</b>, then scan this code or type the pairing code. Phone and computer must be on the same network.</p>
+      <p style="margin:0 0 6px">Pairing code <code id="code"></code></p>
+      <p class="muted" style="margin:0 0 6px">iOS simulator: <code id="local"></code></p>
+      <p class="muted" style="margin:0">Android emulator / USB: run <code id="adb"></code>, then use the simulator code.</p>
+      <p style="margin:12px 0 0"><label class="muted">Address in the QR code <select id="hostSel"></select></label></p>
+    </div>
+  </div>
+</section>
+<main>
+  <section id="list"><table><thead><tr><th>Status</th><th>Method</th><th>Path</th><th id="devHead" hidden>Device</th><th class="num col-size">Size</th><th class="num">Time</th><th class="wf">Waterfall</th></tr></thead><tbody id="rows"></tbody></table><div id="empty" class="empty">Waiting for requests…</div></section>
+  <aside id="detail"><div id="dhead"><span class="muted">Select a request</span></div><div class="tabs" id="tabs"></div><div id="body"></div></aside>
+</main>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  // Text-node escaping only (the highlighter puts this inside plain <span>s, never attributes), so quotes stay as-is.
+  const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+  const entries = new Map();
+  let devices = [], selected = null, tab = 'response', paused = false, pairing = null, filter = 'all', query = '';
+  let pairOpen = true, hadOnline = false;
+  const key = (e) => e.deviceId + ':' + e.id;
+
+  const ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/viewer');
+  ws.onmessage = (ev) => {
+    const m = JSON.parse(ev.data);
+    if (m.type === 'pairing') { pairing = m; renderPairing(); }
+    if (m.type === 'devices') { devices = m.devices; renderDevices(); }
+    if (m.type === 'snapshot') {
+      entries.clear(); m.entries.forEach((e) => entries.set(key(e), e));
+      const h = decodeURIComponent(location.hash.slice(1));
+      if (!selected && h && entries.has(h)) selected = h;
+      renderRows();
+    }
+    if (m.type === 'entries') { m.entries.forEach((e) => entries.set(key(e), e)); renderRows(); }
+  };
+  const send = (command) => ws.send(JSON.stringify({ type: 'command', command }));
+
+  $('pause').onclick = () => { paused = !paused; send(paused ? 'pause' : 'resume'); $('pause').textContent = paused ? 'Resume' : 'Pause'; $('pause').classList.toggle('warn', paused); };
+  $('clear').onclick = () => send('clear');
+  $('q').oninput = (e) => { query = e.target.value.trim().toLowerCase(); renderRows(); };
+  $('pairToggle').onclick = () => { pairOpen = !pairOpen; renderPairPanel(); };
+  $('hostSel').onchange = () => { $('qr').src = '/qr.svg?host=' + encodeURIComponent($('hostSel').value) + '&t=' + Date.now(); };
+
+  // ---- HAR
+  const hdrs = (o) => Object.entries(o || {}).map(([name, value]) => ({ name, value: String(value) }));
+  function toHar(e) {
+    return { startedDateTime: new Date(e.startedAt).toISOString(), time: e.durationMs || 0,
+      request: { method: e.method, url: e.url, httpVersion: 'HTTP/1.1', headers: hdrs(e.requestHeaders), queryString: [], cookies: [], headersSize: -1, bodySize: (e.requestBody || '').length, postData: e.requestBody ? { mimeType: 'application/json', text: e.requestBody } : undefined },
+      response: { status: e.status || 0, statusText: e.error || '', httpVersion: 'HTTP/1.1', headers: hdrs(e.responseHeaders), cookies: [], content: { size: (e.responseBody || '').length, mimeType: (e.responseHeaders || {})['content-type'] || '', text: e.responseBody || '' }, redirectURL: '', headersSize: -1, bodySize: -1 },
+      cache: {}, timings: { send: 0, wait: e.headersAt ? e.headersAt - e.startedAt : 0, receive: e.endedAt && e.headersAt ? e.endedAt - e.headersAt : 0 } };
+  }
+  $('har').onclick = () => {
+    const har = { log: { version: '1.2', creator: { name: 'NetLog', version: '0.1.0' }, entries: [...entries.values()].map(toHar) } };
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(har, null, 2)], { type: 'application/json' }));
+    a.download = 'netlog-' + new Date().toISOString().replace(/[:.]/g, '-') + '.har';
+    a.click();
+  };
+
+  // ---- pairing
+  function renderPairPanel() {
+    $('pairBody').hidden = !pairOpen;
+    $('pairToggle').setAttribute('aria-expanded', String(pairOpen));
+    $('pairTitle').textContent = hadOnline ? 'Pair another device' : 'Pair a device';
+    $('pairSummary').textContent = !pairOpen && pairing ? pairing.code : '';
+  }
+  function renderPairing() {
+    if (!pairing) return;
+    $('code').textContent = pairing.code;
+    $('local').textContent = 'localhost:' + pairing.port + ' ' + pairing.token;
+    $('adb').textContent = 'adb reverse tcp:' + pairing.port + ' tcp:' + pairing.port;
+    $('hostSel').replaceChildren(...pairing.hosts.map((h) => { const o = el('option', null, h); o.value = h; return o; }));
+    $('qr').src = '/qr.svg?host=' + encodeURIComponent(pairing.primaryHost);
+    renderDevices();
+  }
+  function renderDevices() {
+    const online = devices.some((d) => d.online);
+    if (online !== hadOnline) { hadOnline = online; pairOpen = !online; }
+    renderPairPanel();
+    const box = $('devices'); box.replaceChildren();
+    if (!devices.length) { box.append(el('span', 'muted', 'No device connected')); }
+    devices.forEach((d) => {
+      const b = el('span', 'device'); const dot = el('span', 'dot' + (d.online ? ' on' : ''));
+      b.append(dot, el('span', null, d.name || d.id));
+      const meta = [d.platform, d.appVersion].filter(Boolean).join(' · ');
+      if (meta) b.append(el('small', null, meta));
+      box.append(b);
+    });
+    $('devHead').hidden = devices.length < 2;
+    renderRows();
+  }
+
+  // ---- list
+  const isErr = (e) => e.state === 'error' || (e.status || 0) >= 400;
+  const isSlow = (e) => (e.durationMs || 0) > 1000;
+  const split = (url) => { const m = /^[a-z][a-z0-9+.-]*:\/\/([^/?#]*)(.*)$/i.exec(url); return m ? { host: m[1], path: m[2] || '/' } : { host: '', path: url }; };
+  const size = (e) => { const n = Number((e.responseHeaders || {})['content-length']) || (e.responseBody || '').length; return !n ? '—' : n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : (n / 1048576).toFixed(1) + ' MB'; };
+  const dur = (e) => e.state === 'pending' ? 'pending' : e.durationMs == null ? '—' : e.durationMs >= 1000 ? (e.durationMs / 1000).toFixed(2) + ' s' : e.durationMs + ' ms';
+  const statusText = (e) => e.state === 'pending' ? '…' : e.state === 'error' && !e.status ? 'ERR' : String(e.status);
+  const statusCls = (e) => 'pill ' + (e.state === 'error' && !e.status ? 'serr' : 's' + String(e.status || 0)[0]);
+  const devName = (id) => { const d = devices.find((x) => x.id === id); return d ? (d.name || id) : id; };
+
+  function renderChips(all) {
+    const counts = { all: all.length, errors: all.filter(isErr).length, slow: all.filter(isSlow).length, mocked: all.filter((e) => e.mocked).length };
+    const box = $('chips'); box.replaceChildren();
+    [['all', 'All'], ['errors', 'Errors'], ['slow', 'Slow'], ['mocked', 'Mocked']].forEach(([id, label]) => {
+      const b = el('button', 'chip' + (filter === id ? ' on' : ''), label); b.type = 'button'; b.setAttribute('role', 'tab');
+      b.append(el('b', null, String(counts[id])));
+      b.onclick = () => { filter = id; renderRows(); };
+      box.append(b);
+    });
+    $('summary').textContent = counts.all + ' requests · ' + counts.errors + ' errors';
+  }
+
+  function renderRows() {
+    const all = [...entries.values()];
+    renderChips(all);
+    const list = all
+      .filter((e) => filter === 'all' || (filter === 'errors' && isErr(e)) || (filter === 'slow' && isSlow(e)) || (filter === 'mocked' && e.mocked))
+      .filter((e) => !query || (e.method + ' ' + (e.status || '') + ' ' + e.url).toLowerCase().includes(query))
+      .sort((a, b) => b.startedAt - a.startedAt);
+    const t0 = Math.min(...list.map((e) => e.startedAt)), t1 = Math.max(...list.map((e) => e.endedAt || Date.now()));
+    const span = Math.max(1, t1 - t0);
+    const multi = devices.length > 1;
+    $('empty').hidden = list.length > 0;
+    $('rows').replaceChildren(...list.map((e) => {
+      const tr = el('tr', key(e) === selected ? 'sel' : isErr(e) ? 'errrow' : '');
+      const st = el('td'); st.append(el('span', statusCls(e), statusText(e)));
+      const me = el('td', 'method m-' + e.method, e.method);
+      const { host, path } = split(e.url);
+      const pa = el('td', 'path'); const b = el('b', null, path); if (e.mocked) b.append(el('span', 'tag', 'MOCK'));
+      pa.append(b, el('small', null, host + (e.error ? ' · ' + e.error : ''))); pa.title = e.url;
+      const cells = [st, me, pa];
+      if (multi) cells.push(el('td', 'muted', devName(e.deviceId)));
+      cells.push(el('td', 'num col-size', size(e)), el('td', 'num' + (isSlow(e) ? ' slow' : ''), dur(e)));
+      const wf = el('td', 'wf'); const track = el('div', 'wft'); const bar = el('div', 'wfb');
+      bar.style.left = ((e.startedAt - t0) / span * 100) + '%';
+      bar.style.width = Math.max(1, ((e.endedAt || Date.now()) - e.startedAt) / span * 100) + '%';
+      bar.style.background = e.state === 'pending' ? 'var(--wfpend)' : isErr(e) ? ((e.status || 0) >= 500 || !e.status ? 'var(--wferr)' : 'var(--wfwarn)') : 'var(--wf)';
+      track.append(bar); wf.append(track); cells.push(wf);
+      tr.append(...cells);
+      tr.onclick = () => { selected = key(e); history.replaceState(null, '', '#' + encodeURIComponent(selected)); renderRows(); };
+      return tr;
+    }));
+    renderDetail();
+  }
+
+  // ---- detail
+  function highlight(json) {
+    return esc(json).replace(/("(?:\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*")(\s*:)?|\b(true|false|null)\b|-?\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b/g, (m, str, colon, lit) => {
+      if (str) return colon ? '<span class="k">' + str + '</span>' + colon : '<span class="s">' + str + '</span>';
+      if (lit) return '<span class="b">' + m + '</span>';
+      return '<span class="n">' + m + '</span>';
+    });
+  }
+  function bodyView(text) {
+    const pre = el('pre');
+    if (!text) { pre.className = 'muted'; pre.textContent = '(empty)'; return pre; }
+    try { pre.innerHTML = highlight(JSON.stringify(JSON.parse(text), null, 2)); } catch { pre.textContent = text; }
+    return pre;
+  }
+  function kv(title, obj) {
+    const wrap = el('div'); wrap.append(el('h4', null, title));
+    const dl = el('dl', 'kv');
+    const list = Object.entries(obj || {});
+    if (!list.length) dl.append(el('dt', null, '(none)'), el('dd'));
+    list.forEach(([k, v]) => dl.append(el('dt', null, k), el('dd', null, String(v))));
+    wrap.append(dl); return wrap;
+  }
+  function timing(e) {
+    const box = el('div', 'timing');
+    if (e.durationMs == null) { box.append(el('span', 'muted', 'Waiting for response…')); return box; }
+    const total = e.durationMs, wait = e.headersAt ? e.headersAt - e.startedAt : total, down = Math.max(0, total - wait);
+    [['Waiting for server', wait, 0, 'var(--wf)'], ['Download', down, wait, '#47CD89']].forEach(([label, ms, off, color]) => {
+      const r = el('div'); const head = el('div', 'row'); head.append(el('span', null, label), el('b', null, ms + ' ms'));
+      const tr = el('div', 'wft'); const b = el('div', 'wfb'); b.style.left = (off / total * 100) + '%'; b.style.width = Math.max(1, ms / total * 100) + '%'; b.style.background = color;
+      tr.append(b); r.append(head, tr); box.append(r);
+    });
+    const tot = el('div', 'row'); tot.append(el('b', null, 'Total'), el('b', null, dur(e))); box.append(tot);
+    box.append(el('p', 'muted', 'Measured in the app’s JS from send() to load. DNS, TLS and connection time aren’t visible from JS.'));
+    return box;
+  }
+  function renderDetail() {
+    const e = selected && entries.get(selected);
+    const head = $('dhead'), tabs = $('tabs'), body = $('body');
+    head.replaceChildren(); tabs.replaceChildren(); body.replaceChildren();
+    if (!e) { head.append(el('span', 'muted', 'Select a request')); return; }
+    const line = el('div', 'line');
+    line.append(el('span', 'method m-' + e.method, e.method), el('span', statusCls(e), statusText(e)), el('span', 'muted', dur(e) + ' · ' + size(e)));
+    const chips = el('div', 'chipline');
+    chips.append(el('span', 'c info', split(e.url).host), el('span', 'c mono', new Date(e.startedAt).toLocaleTimeString()), el('span', 'c', devName(e.deviceId)));
+    if (e.mocked) chips.append(el('span', 'c mock', 'MOCK · ' + e.mocked.label));
+    if (e.error) chips.append(el('span', 'c err', e.error));
+    head.append(line, el('div', 'url', e.url), chips);
+    ['headers', 'request', 'response', 'timing', 'initiator'].forEach((t) => {
+      const b = el('button', t === tab ? 'on' : '', t[0].toUpperCase() + t.slice(1)); b.type = 'button';
+      b.onclick = () => { tab = t; renderDetail(); }; tabs.append(b);
+    });
+    if (tab === 'headers') body.append(kv('Request headers', e.requestHeaders), kv('Response headers', e.responseHeaders));
+    else if (tab === 'request') body.append(bodyView(e.requestBody));
+    else if (tab === 'response') body.append(bodyView(e.responseBody));
+    else if (tab === 'timing') body.append(timing(e));
+    else { const pre = el('pre', e.initiator ? '' : 'muted', e.initiator || '(not captured)'); body.append(pre); }
+  }
+})();
+</script>
+</body>
+</html>

@@ -206,6 +206,6 @@ const styles = StyleSheet.create({
   mock: { fontSize: 10, fontWeight: '700', paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4, overflow: 'hidden' },
   rowSide: { alignItems: 'flex-end', gap: 4 },
   status: { minWidth: 38, textAlign: 'center', fontSize: 12, fontWeight: '700', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, overflow: 'hidden' },
-  time: { fontSize: 12, fontVariant: ['tabular-nums'] },
+  time: { fontSize: 12 },
   empty: { padding: 40, textAlign: 'center', fontSize: 14 },
 });

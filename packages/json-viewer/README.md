@@ -1,6 +1,11 @@
 # react-native-netlog-json-viewer
 
-A fast, searchable JSON tree viewer for React Native. No native code, no dependencies.
+A fast, searchable JSON tree viewer for React Native. No native code, no dependencies. Part of [NetLog](https://github.com/Kaveh-ap/react-native-netLog).
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Kaveh-ap/react-native-netLog/main/docs/images/app-json-search.png" width="32%" alt="JSON viewer with search, light">
+  <img src="https://raw.githubusercontent.com/Kaveh-ap/react-native-netLog/main/docs/images/app-json-dark.png" width="32%" alt="JSON viewer with search, dark">
+</p>
 
 - Collapsible tree with line numbers and type colors
 - Search keys and/or values, match count, next/previous, auto-expands to matches

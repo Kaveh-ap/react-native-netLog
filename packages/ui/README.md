@@ -1,6 +1,15 @@
+<p align="center"><img src="https://raw.githubusercontent.com/Kaveh-ap/react-native-netLog/main/docs/images/banner.svg" alt="NetLog" width="100%"></p>
+
 # react-native-netlog-ui
 
-The NetLog in-app network inspector for React Native. Plain React Native components, no native code.
+The NetLog in-app network inspector for React Native. Plain React Native components, no native code. Part of [NetLog](https://github.com/Kaveh-ap/react-native-netLog).
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Kaveh-ap/react-native-netLog/main/docs/images/app-requests.png" width="24%" alt="Requests">
+  <img src="https://raw.githubusercontent.com/Kaveh-ap/react-native-netLog/main/docs/images/app-json-search.png" width="24%" alt="JSON viewer">
+  <img src="https://raw.githubusercontent.com/Kaveh-ap/react-native-netLog/main/docs/images/app-mocks.png" width="24%" alt="Mocks">
+  <img src="https://raw.githubusercontent.com/Kaveh-ap/react-native-netLog/main/docs/images/app-requests-dark.png" width="24%" alt="Dark mode">
+</p>
 
 - **Requests:** search, All / Errors / Slow / Pending / Mocked filters, pause, clear, export HAR
 - **Request details:** host and time chips, overview, the code that sent the request, headers, bodies in a searchable JSON viewer (Tree / Raw), timing; Copy cURL, Share, **Edit & resend**, **Mock this**

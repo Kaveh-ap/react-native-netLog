@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" role="img" aria-label="NetLog — the network inspector for React Native">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0C111D"/>
+      <stop offset="1" stop-color="#16213D"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.85" cy="0.1" r="0.6">
+      <stop offset="0" stop-color="#2E90FA" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#2E90FA" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1280" height="360" rx="24" fill="url(#bg)"/>
+  <rect width="1280" height="360" rx="24" fill="url(#glow)"/>
+
+  <g transform="translate(80 92)">
+    <rect width="88" height="88" rx="22" fill="#F5F5F6"/>
+    <g fill="#0C111D">
+      <circle cx="26" cy="28" r="5"/><rect x="38" y="24" width="30" height="8" rx="4"/>
+      <circle cx="26" cy="44" r="5"/><rect x="38" y="40" width="30" height="8" rx="4"/>
+      <circle cx="26" cy="60" r="5"/><rect x="38" y="56" width="30" height="8" rx="4"/>
+    </g>
+  </g>
+
+  <text x="196" y="160" fill="#F5F5F6" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="72" font-weight="800" letter-spacing="-1.5">NetLog</text>
+  <text x="82" y="232" fill="#CECFD2" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="28" font-weight="500">The network inspector for React Native.</text>
+  <text x="82" y="270" fill="#94969C" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22">Pure JavaScript — no native module, no native build, no private APIs.</text>
+
+  <g font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17" font-weight="600">
+    <g transform="translate(82 300)">
+      <rect width="138" height="34" rx="17" fill="#102A56"/><text x="69" y="23" fill="#84CAFF" text-anchor="middle">fetch · axios</text>
+    </g>
+    <g transform="translate(232 300)">
+      <rect width="170" height="34" rx="17" fill="#4E1D09"/><text x="85" y="23" fill="#FEC84B" text-anchor="middle">Mocks · throttling</text>
+    </g>
+    <g transform="translate(414 300)">
+      <rect width="150" height="34" rx="17" fill="#053321"/><text x="75" y="23" fill="#75E0A7" text-anchor="middle">JSON viewer</text>
+    </g>
+    <g transform="translate(576 300)">
+      <rect width="126" height="34" rx="17" fill="#2C1C5F"/><text x="63" y="23" fill="#BDB4FE" text-anchor="middle">RTL ready</text>
+    </g>
+    <g transform="translate(714 300)">
+      <rect width="196" height="34" rx="17" fill="#1F242F"/><text x="98" y="23" fill="#F5F5F6" text-anchor="middle">Desktop live viewer</text>
+    </g>
+  </g>
+
+  <g transform="translate(980 72)" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15">
+    <rect width="230" height="216" rx="18" fill="#161B26" stroke="#2A3140"/>
+    <g transform="translate(18 34)">
+      <text fill="#84CAFF" font-weight="700">GET</text><text x="46" fill="#F5F5F6">/products/1</text><text x="178" fill="#75E0A7" font-weight="700">200</text>
+      <text y="38" fill="#BDB4FE" font-weight="700">POST</text><text x="46" y="38" fill="#F5F5F6">/graphql</text><text x="178" y="38" fill="#75E0A7" font-weight="700">200</text>
+      <text y="76" fill="#84CAFF" font-weight="700">GET</text><text x="46" y="76" fill="#F5F5F6">/users/1</text><text x="178" y="76" fill="#FDA29B" font-weight="700">503</text>
+      <text y="114" fill="#FEC84B" font-weight="700">PUT</text><text x="46" y="114" fill="#F5F5F6">/cart</text><text x="178" y="114" fill="#75E0A7" font-weight="700">200</text>
+      <text y="152" fill="#FDA29B" font-weight="700">DEL</text><text x="46" y="152" fill="#F5F5F6">/posts/1</text><text x="178" y="152" fill="#FEC84B" font-weight="700">404</text>
+    </g>
+  </g>
+</svg>

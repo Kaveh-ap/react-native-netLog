@@ -42,7 +42,20 @@ function safeEqual(a, b) {
  * Devices connect to ws://host:port/device; the browser viewer is served at http://host:port/.
  */
 export async function startServer(options = {}) {
-  const { port = 9099, host = '0.0.0.0', token = randomToken(), name = os.hostname(), maxEntries = 5000 } = options;
+  const {
+    port = 9099,
+    host = '0.0.0.0',
+    token = randomToken(),
+    name = os.hostname(),
+    maxEntries = 5000,
+    // The viewer shows captured traffic and can pause/clear devices, so by
+    // default only this computer may open it. Devices still connect from the LAN.
+    allowRemoteViewer = false,
+  } = options;
+  const isLocal = (req) => {
+    const a = req.socket.remoteAddress ?? '';
+    return a === '127.0.0.1' || a === '::1' || a === '::ffff:127.0.0.1';
+  };
 
   /** deviceId -> { info, socket, connectedAt } */
   const devices = new Map();
@@ -74,6 +87,10 @@ export async function startServer(options = {}) {
   };
 
   const server = http.createServer(async (req, res) => {
+    if (!allowRemoteViewer && !isLocal(req)) {
+      res.writeHead(403, { 'content-type': 'text/plain' });
+      return res.end('NetLog viewer is only available on this computer. Start netlog-desktop with --allow-remote-viewer to share it.');
+    }
     const url = new URL(req.url ?? '/', 'http://localhost');
     if (url.pathname === '/') {
       res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
@@ -99,6 +116,7 @@ export async function startServer(options = {}) {
   server.on('upgrade', (req, socket, head) => {
     const path = new URL(req.url ?? '/', 'http://localhost').pathname;
     if (path !== '/device' && path !== '/viewer') return socket.destroy();
+    if (path === '/viewer' && !allowRemoteViewer && !isLocal(req)) return socket.destroy();
     wss.handleUpgrade(req, socket, head, (ws) => (path === '/device' ? onDevice(ws) : onViewer(ws, req)));
   });
 
