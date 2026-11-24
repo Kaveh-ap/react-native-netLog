@@ -107,13 +107,17 @@ function captureStack(): string | undefined {
   if (!getConfig().captureStack) return undefined;
   const stack = new Error().stack;
   if (!stack) return undefined;
-  // drop "Error" and our own frames
-  return stack
+  const frames = stack
     .split('\n')
-    .slice(1)
-    .filter((l) => !/netlog|xhr\.ts|XMLHttpRequest/.test(l))
-    .slice(0, 8)
     .map((l) => l.trim())
+    .filter((l) => l.startsWith('at '));
+  // Our own frames come first: captureStack, track, then the patched send().
+  // Bundled builds lose file names, so find them by function name.
+  const trackAt = frames.findIndex((l) => /^at (?:\S+\.)?track[\s(]/.test(l));
+  const callerFrames = trackAt >= 0 ? frames.slice(trackAt + 2) : frames.slice(1);
+  return callerFrames
+    .filter((l) => !/netlog|xhr\.ts/.test(l))
+    .slice(0, 8)
     .join('\n');
 }
 

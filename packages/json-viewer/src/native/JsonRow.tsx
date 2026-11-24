@@ -1,5 +1,7 @@
 import { memo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Chevron } from './Chevron';
+import { physicalAlign, Text } from './Text';
 import {
   closeBracket,
   formatKey,
@@ -147,9 +149,11 @@ export const JsonRow = memo(function JsonRow(props: JsonRowProps) {
         </Text>
       ) : null}
       <View style={{ width: row.depth * indent }} />
-      <Text style={[styles.chevron, { color: theme.muted }]}>
-        {toggleable ? (row.type === 'open' ? '▾' : '▸') : ' '}
-      </Text>
+      <View style={styles.chevronBox}>
+        {toggleable ? (
+          <Chevron direction={row.type === 'open' ? 'down' : 'right'} size={12} color={theme.muted} />
+        ) : null}
+      </View>
       <Text style={[styles.text, { fontFamily: theme.monoFontFamily }]} numberOfLines={1} ellipsizeMode="tail">
         {keyText ? (
           <>
@@ -193,13 +197,13 @@ const styles = StyleSheet.create({
   },
   lineNumber: {
     fontSize: 11,
-    textAlign: 'right',
+    textAlign: physicalAlign('right'),
     paddingEnd: 8,
   },
-  chevron: {
-    width: 14,
-    fontSize: 11,
-    textAlign: 'center',
+  chevronBox: {
+    width: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   text: {
     flex: 1,

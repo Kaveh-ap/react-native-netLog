@@ -3,20 +3,31 @@
   "version": "0.1.0",
   "description": "NetLog: JS-only network capture for React Native (XMLHttpRequest/fetch), a shared store, and optional desktop pairing.",
   "license": "MIT",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./lib/index.js",
+  "module": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "react-native": "./src/index.ts",
+  "source": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
+    ".": {
+      "react-native": "./src/index.ts",
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
-    "src"
+    "src",
+    "lib",
+    "!**/__tests__",
+    "README.md"
   ],
   "sideEffects": false,
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "rm -rf lib && tsc -p tsconfig.build.json",
+    "prepack": "npm run build"
   },
   "devDependencies": {
     "typescript": "^5.8.3",
@@ -38,5 +49,8 @@
   "homepage": "https://github.com/Kaveh-ap/react-native-netLog/tree/main/packages/core#readme",
   "bugs": {
     "url": "https://github.com/Kaveh-ap/react-native-netLog/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -4,12 +4,12 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
   type ListRenderItemInfo,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import { Text } from './Text';
 import { DEFAULT_MAX_VALUE_LENGTH, parseJson, type Row, type SearchScope } from '../core';
 import { useJsonViewer } from '../react/useJsonViewer';
 import { JsonRow } from './JsonRow';

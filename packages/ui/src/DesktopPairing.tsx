@@ -3,12 +3,12 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   View,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import { Text } from './Text';
 import { disconnectFromDesktop, pairFromPayload, type DeviceInfo, type PairingStatus } from 'react-native-netlog';
 import { useNetLogFeature, usePairingStatus } from './hooks';
 

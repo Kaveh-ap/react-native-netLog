@@ -14,7 +14,8 @@
   },
   "files": [
     "bin",
-    "src"
+    "src",
+    "README.md"
   ],
   "scripts": {
     "start": "node bin/netlog-desktop.mjs",
@@ -39,5 +40,8 @@
   "homepage": "https://github.com/Kaveh-ap/react-native-netLog/tree/main/packages/desktop#readme",
   "bugs": {
     "url": "https://github.com/Kaveh-ap/react-native-netLog/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

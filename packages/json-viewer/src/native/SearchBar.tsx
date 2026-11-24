@@ -1,4 +1,7 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Chevron } from './Chevron';
+import { SearchIcon } from './SearchIcon';
+import { Text } from './Text';
 import type { SearchScope } from '../core';
 import type { JsonViewerTheme } from './theme';
 
@@ -64,6 +67,7 @@ export function SearchBar(props: Props) {
     <View style={[styles.container, { borderColor: theme.border, backgroundColor: theme.surface }]}>
       <View style={styles.searchRow}>
         <View style={[styles.inputWrap, { backgroundColor: theme.inputBackground }]}>
+          <SearchIcon size={16} color={theme.muted} />
           <TextInput
             value={query}
             onChangeText={props.onQueryChange}
@@ -91,7 +95,7 @@ export function SearchBar(props: Props) {
           accessibilityLabel={labels.previousMatch}
           style={[styles.navButton, { backgroundColor: theme.inputBackground, opacity: navDisabled ? 0.4 : 1 }]}
         >
-          <Text style={[styles.navGlyph, { color: theme.text }]}>⌃</Text>
+          <Chevron direction="up" size={16} color={theme.text} />
         </Pressable>
         <Pressable
           onPress={props.onNext}
@@ -100,7 +104,7 @@ export function SearchBar(props: Props) {
           accessibilityLabel={labels.nextMatch}
           style={[styles.navButton, { backgroundColor: theme.inputBackground, opacity: navDisabled ? 0.4 : 1 }]}
         >
-          <Text style={[styles.navGlyph, styles.flip, { color: theme.text }]}>⌃</Text>
+          <Chevron direction="down" size={16} color={theme.text} />
         </Pressable>
       </View>
       <View style={styles.toolRow}>
@@ -148,12 +152,11 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 12,
     paddingHorizontal: 12,
+    gap: 6,
   },
   input: { flex: 1, fontSize: 14, paddingVertical: 0 },
-  count: { fontSize: 12, marginStart: 6, fontVariant: ['tabular-nums'] },
+  count: { fontSize: 12, fontVariant: ['tabular-nums'] },
   navButton: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  navGlyph: { fontSize: 18, fontWeight: '700' },
-  flip: { transform: [{ rotate: '180deg' }] },
   toolRow: { flexDirection: 'row', alignItems: 'center' },
   segment: { flexDirection: 'row', borderRadius: 9, padding: 2 },
   segmentItem: { height: 32, paddingHorizontal: 10, borderRadius: 7, justifyContent: 'center' },

@@ -3,22 +3,37 @@
   "version": "0.1.0",
   "description": "NetLog JSON viewer: fast, searchable, dependency-free JSON tree viewer for React Native, with a platform-agnostic core.",
   "license": "MIT",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./lib/index.js",
+  "module": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "react-native": "./src/index.ts",
+  "source": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./core": "./src/core/index.ts",
+    ".": {
+      "react-native": "./src/index.ts",
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./core": {
+      "react-native": "./src/core/index.ts",
+      "types": "./lib/core/index.d.ts",
+      "default": "./lib/core/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
-    "src"
+    "src",
+    "lib",
+    "!**/__tests__",
+    "README.md"
   ],
   "sideEffects": false,
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "bench": "PERF=1 vitest run test/perf.test.ts"
+    "bench": "PERF=1 vitest run test/perf.test.ts",
+    "build": "rm -rf lib && tsc -p tsconfig.build.json",
+    "prepack": "npm run build"
   },
   "peerDependencies": {
     "react": ">=18",
@@ -47,5 +62,8 @@
   "homepage": "https://github.com/Kaveh-ap/react-native-netLog/tree/main/packages/json-viewer#readme",
   "bugs": {
     "url": "https://github.com/Kaveh-ap/react-native-netLog/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

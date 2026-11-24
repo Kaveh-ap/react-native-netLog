@@ -12,6 +12,7 @@ export {
   type IgnoreRule,
 } from './config';
 export { initNetLog, type InitNetLogOptions } from './init';
+export { toCurl, toHar, toShareText, resend, type ExportOptions } from './export';
 export { startCapture, stopCapture, isCapturing, parseHeaders } from './xhr';
 export { getEntries, clearEntries, subscribe, setPaused, isPaused } from './store';
 export {
