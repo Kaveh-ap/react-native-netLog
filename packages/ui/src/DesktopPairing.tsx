@@ -48,7 +48,7 @@ export const defaultPairingLabels: DesktopPairingLabels = {
 
 export interface DesktopPairingProps {
   /**
-   * Renders a QR scanner. netlog has no camera code of its own: pass your
+   * Renders a QR scanner. NetLog has no camera code of its own: pass your
    * app's scanner (e.g. react-native-vision-camera) here. Without it, only the
    * typed pairing code is offered.
    */
@@ -107,7 +107,7 @@ export function DesktopPairing(props: DesktopPairingProps) {
       pairFromPayload(text, { device });
       setScanning(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message.replace(/^netlog: /, '') : String(e));
+      setError(e instanceof Error ? e.message.replace(/^NetLog: /, '') : String(e));
     }
   };
 

@@ -1,7 +1,7 @@
 {
   "name": "react-native-netlog-desktop",
   "version": "0.1.0",
-  "description": "Desktop companion for netlog: shows a pairing QR code and a live view of the app's network traffic.",
+  "description": "Desktop companion for NetLog: shows a pairing QR code and a live view of the app's network traffic.",
   "license": "MIT",
   "type": "module",
   "bin": {

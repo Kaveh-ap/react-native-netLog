@@ -21,13 +21,13 @@ const server = await startServer({
 const p = server.pairing();
 
 console.log(`
-netlog desktop is running
+NetLog desktop is running
 
   Viewer:        http://localhost:${p.port}
   Pairing code:  ${p.code}
   Simulator/USB: localhost:${p.port} ${p.token}   (Android USB: adb reverse tcp:${p.port} tcp:${p.port})
 
-Scan with the app (netlog → Connect to desktop):
+Scan with the app (NetLog → Connect to desktop):
 `);
 console.log(await terminalQr(p.link));
 

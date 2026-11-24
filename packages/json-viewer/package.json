@@ -1,7 +1,7 @@
 {
   "name": "react-native-netlog-json-viewer",
   "version": "0.1.0",
-  "description": "Fast, searchable, dependency-free JSON tree viewer for React Native, with a platform-agnostic core.",
+  "description": "NetLog JSON viewer: fast, searchable, dependency-free JSON tree viewer for React Native, with a platform-agnostic core.",
   "license": "MIT",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

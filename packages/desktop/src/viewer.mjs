@@ -6,7 +6,7 @@ export function viewerHtml() {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>netlog</title>
+<title>NetLog</title>
 <style>
 :root{--bg:#F9FAFB;--surface:#fff;--border:#EAECF0;--text:#101828;--muted:#475467;--accent:#175CD3;--ok:#067647;--okbg:#ECFDF3;--warn:#B54708;--warnbg:#FFFAEB;--err:#B42318;--errbg:#FEF3F2;--sel:#EFF4FF}
 @media (prefers-color-scheme:dark){:root{--bg:#0C111D;--surface:#161B26;--border:#1F242F;--text:#F5F5F6;--muted:#94969C;--accent:#84ADFF;--ok:#75E0A7;--okbg:#053321;--warn:#FEC84B;--warnbg:#4E1D09;--err:#FDA29B;--errbg:#55160C;--sel:#102A56}}
@@ -29,7 +29,7 @@ pre{margin:0;padding:12px 16px;font:12px/1.55 ui-monospace,Menlo,monospace;white
 </head>
 <body>
 <header>
-  <h1>netlog</h1>
+  <h1>NetLog</h1>
   <span id="devices" class="muted">No device connected</span>
   <span class="grow"></span>
   <button id="pause" type="button">Pause</button>
@@ -40,7 +40,7 @@ pre{margin:0;padding:12px 16px;font:12px/1.55 ui-monospace,Menlo,monospace;white
   <img id="qr" alt="Pairing QR code">
   <div>
     <h2 style="margin:0 0 8px;font-size:18px">Pair a device</h2>
-    <p class="muted" style="margin:0 0 12px;max-width:440px">In the app's netlog screen, tap <b>Connect to desktop</b> and scan this code, or type the pairing code. Phone and computer must be on the same network.</p>
+    <p class="muted" style="margin:0 0 12px;max-width:440px">In the app's NetLog screen, tap <b>Connect to desktop</b> and scan this code, or type the pairing code. Phone and computer must be on the same network.</p>
     <p style="margin:0 0 6px">Pairing code: <code id="code"></code></p>
     <p class="muted" style="margin:0">Simulator / USB (after <code>adb reverse tcp:PORT tcp:PORT</code>): <code id="local"></code></p>
     <p style="margin:12px 0 0"><label class="muted">Address for the QR: <select id="hostSel"></select></label></p>
@@ -69,7 +69,7 @@ pre{margin:0;padding:12px 16px;font:12px/1.55 ui-monospace,Menlo,monospace;white
   $('pause').onclick = () => { paused = !paused; send(paused ? 'pause' : 'resume'); $('pause').textContent = paused ? 'Resume' : 'Pause'; };
   $('clear').onclick = () => send('clear');
   $('har').onclick = () => {
-    const har = { log: { version: '1.2', creator: { name: 'netlog', version: '0.1.0' }, entries: [...entries.values()].map(toHar) } };
+    const har = { log: { version: '1.2', creator: { name: 'NetLog', version: '0.1.0' }, entries: [...entries.values()].map(toHar) } };
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(har, null, 2)], { type: 'application/json' }));
     a.download = 'netlog-' + new Date().toISOString().replace(/[:.]/g, '-') + '.har';

@@ -1,7 +1,7 @@
 {
   "name": "react-native-netlog",
   "version": "0.1.0",
-  "description": "JS-only network capture for React Native (XMLHttpRequest/fetch), a shared store, and optional desktop pairing.",
+  "description": "NetLog: JS-only network capture for React Native (XMLHttpRequest/fetch), a shared store, and optional desktop pairing.",
   "license": "MIT",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

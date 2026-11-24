@@ -61,7 +61,7 @@ export function subscribeConfig(listener: (config: NetLogConfig) => void): () =>
 
 export class NetLogFeatureDisabledError extends Error {
   constructor(public readonly feature: keyof NetLogFeatures) {
-    super(`netlog: the "${feature}" feature is disabled (configure({ features: { ${feature}: true } }))`);
+    super(`NetLog: the "${feature}" feature is disabled (configure({ features: { ${feature}: true } }))`);
     this.name = 'NetLogFeatureDisabledError';
   }
 }

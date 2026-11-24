@@ -237,7 +237,7 @@ export function connectToDesktop(info: PairingInfo, options: ConnectOptions = {}
   assertFeature('qrPairing');
   disconnectFromDesktop();
   const WebSocketImpl = options.WebSocketImpl ?? (globalThis as { WebSocket?: typeof WebSocket }).WebSocket;
-  if (!WebSocketImpl) throw new Error('netlog: no WebSocket implementation available');
+  if (!WebSocketImpl) throw new Error('NetLog: no WebSocket implementation available');
   const conn: Connection = {
     info,
     device: { id: randomId(), ...options.device },
@@ -262,13 +262,13 @@ export function connectToDesktop(info: PairingInfo, options: ConnectOptions = {}
 export function pairFromPayload(text: string, options?: ConnectOptions): PairingInfo {
   assertFeature('qrPairing');
   const info = parsePairingPayload(text);
-  if (!info) throw new Error('netlog: not a pairing QR code or pairing code');
+  if (!info) throw new Error('NetLog: not a pairing QR code or pairing code');
   connectToDesktop(info, options);
   return info;
 }
 
 /**
- * For deep links: returns true if `url` was a netlog pairing link and pairing
+ * For deep links: returns true if `url` was a NetLog pairing link and pairing
  * started. Returns false (and does nothing) for other URLs or when the feature is off.
  */
 export function handleNetLogUrl(url: string, options?: ConnectOptions): boolean {
