@@ -4,6 +4,8 @@ export interface FakeResponse {
   headers?: string;
   body?: string;
   fail?: 'error' | 'timeout' | 'abort';
+  /** 'blob' mimics React Native's fetch(). */
+  responseType?: '' | 'blob';
 }
 
 export class FakeXHR {
@@ -41,8 +43,9 @@ export class FakeXHR {
     this.headers = r.headers ?? '';
     this.readyState = 2;
     this.fire('readystatechange');
-    this.responseText = r.body ?? '';
-    this.response = this.responseText;
+    this.responseType = r.responseType ?? '';
+    this.responseText = r.responseType === 'blob' ? '' : r.body ?? '';
+    this.response = r.responseType === 'blob' ? new Blob([r.body ?? '']) : this.responseText;
     this.readyState = 4;
     this.fire('readystatechange');
     this.fire('load');

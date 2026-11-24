@@ -49,6 +49,45 @@ function readResponse(xhr: XMLHttpRequest): string | undefined {
   }
 }
 
+const TEXT_TYPE = /json|text|xml|javascript|x-www-form-urlencoded|graphql/i;
+
+type BlobLike = { size?: number; text?: () => Promise<string> };
+type FileReaderCtor = new () => {
+  onload: (() => void) | null;
+  onerror: (() => void) | null;
+  result: unknown;
+  readAsText(blob: unknown): void;
+};
+
+function blobToText(blob: BlobLike): Promise<string | undefined> {
+  const Reader = (globalThis as { FileReader?: FileReaderCtor }).FileReader;
+  if (Reader) {
+    return new Promise((resolve) => {
+      const reader = new Reader();
+      reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : undefined);
+      reader.onerror = () => resolve(undefined);
+      reader.readAsText(blob);
+    });
+  }
+  return typeof blob.text === 'function' ? blob.text().catch(() => undefined) : Promise.resolve(undefined);
+}
+
+/**
+ * React Native's fetch() asks XHR for a Blob. Reads text-like blobs
+ * (JSON, text, XML...) asynchronously; binary content keeps its size label.
+ */
+function readBlobResponse(xhr: XMLHttpRequest, entry: NetworkEntry) {
+  if (xhr.responseType !== 'blob') return;
+  const blob = xhr.response as BlobLike | null;
+  const contentType = entry.responseHeaders?.['content-type'] ?? '';
+  if (!blob || (contentType && !TEXT_TYPE.test(contentType))) return;
+  blobToText(blob).then((text) => {
+    if (text === undefined) return;
+    entry.responseBody = truncate(text);
+    updateEntry(entry);
+  });
+}
+
 export function parseHeaders(raw: string | null | undefined): Record<string, string> {
   const out: Record<string, string> = {};
   if (!raw) return out;
@@ -115,6 +154,7 @@ function track(xhr: XMLHttpRequest, m: Meta, body: unknown) {
       entry.state = 'done';
     }
     updateEntry(entry);
+    readBlobResponse(xhr, entry);
   };
 
   xhr.addEventListener('readystatechange', () => {

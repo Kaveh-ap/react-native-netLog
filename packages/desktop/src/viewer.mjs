@@ -22,7 +22,7 @@ tr{cursor:pointer}tr.sel{background:var(--sel)}.pill{padding:1px 6px;border-radi
 .s2{color:var(--ok);background:var(--okbg)}.s4{color:var(--warn);background:var(--warnbg)}.s5,.serr{color:var(--err);background:var(--errbg)}.s0{color:var(--muted)}
 pre{margin:0;padding:12px 16px;font:12px/1.55 ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-all;overflow:auto;flex:1}
 #pair{display:flex;gap:24px;align-items:center;flex-wrap:wrap;padding:32px;margin:24px;border:1px dashed var(--border);border-radius:16px;background:var(--surface)}
-#pair img{width:220px;height:220px;background:#fff;border-radius:12px;padding:8px}code{font:13px ui-monospace,Menlo,monospace;background:var(--bg);padding:2px 6px;border-radius:6px}
+#pair[hidden]{display:none}#pair img{width:220px;height:220px;background:#fff;border-radius:12px;padding:8px}code{font:13px ui-monospace,Menlo,monospace;background:var(--bg);padding:2px 6px;border-radius:6px}
 .tabs{display:flex;gap:4px;padding:8px 12px 0;border-bottom:1px solid var(--border)}.tabs button{border:0;border-radius:0;border-bottom:2px solid transparent;background:none;color:var(--muted)}.tabs button.on{border-color:var(--text);color:var(--text)}
 #dhead{padding:12px 16px;border-bottom:1px solid var(--border);font:12px ui-monospace,Menlo,monospace;word-break:break-all}
 </style>

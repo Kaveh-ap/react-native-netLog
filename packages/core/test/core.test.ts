@@ -54,6 +54,18 @@ describe('capture', () => {
     expect(e!.headersAt).toBeDefined();
   });
 
+  it('reads text bodies from blob responses (React Native fetch)', async () => {
+    startCapture();
+    FakeXHR.next = { status: 200, headers: 'Content-Type: application/json', body: '{"items":[1,2]}', responseType: 'blob' };
+    request('GET', 'https://x.test/fetch');
+    FakeXHR.next = { status: 200, headers: 'Content-Type: image/png', body: 'PNGDATA', responseType: 'blob' };
+    request('GET', 'https://x.test/image.png');
+    await new Promise((r) => setTimeout(r, 20));
+    const [json, image] = getEntries();
+    expect(json!.responseBody).toBe('{"items":[1,2]}');
+    expect(image!.responseBody).toBe('[blob 7 bytes]');
+  });
+
   it('marks network errors, timeouts and aborts', () => {
     startCapture();
     for (const fail of ['error', 'timeout', 'abort'] as const) {
