@@ -1,6 +1,6 @@
 {
   "name": "react-native-netlog-ui",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "NetLog in-app network inspector for React Native: request list, details with JSON viewer, cURL/HAR export, and optional desktop pairing.",
   "license": "MIT",
   "main": "./lib/index.js",
@@ -30,7 +30,7 @@
     "prepack": "npm run build"
   },
   "dependencies": {
-    "react-native-netlog": "^0.1.0",
+    "react-native-netlog": "^0.1.1",
     "react-native-netlog-json-viewer": "^0.1.1"
   },
   "peerDependencies": {

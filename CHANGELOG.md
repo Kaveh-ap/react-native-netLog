@@ -2,6 +2,19 @@
 
 All notable changes to NetLog. The packages are versioned together where possible.
 
+## 0.1.1 — 2026-11-24
+
+### react-native-netlog-desktop
+- **Security:** the viewer, QR code and pairing info now only answer this computer. Before, anyone on the same network could open the viewer. Use `--allow-remote-viewer` to share it. Devices still pair over the network.
+- Redesigned viewer: path and host, method colors, waterfall, detail header, highlighted JSON, search and filter chips, links to a request (`#device:id`).
+- Full guide: setup, pairing per platform, QR scanner example, troubleshooting, programmatic API.
+
+### react-native-netlog-json-viewer
+- Fix: the search match count no longer gets clipped on Android.
+
+### All packages
+- New README with screenshots, LICENSE file, and links to the repository.
+
 ## 0.1.0 — 2026-11-24
 
 First public release.
@@ -21,11 +34,9 @@ First public release.
 - `NetLogBubble`: floating bubble with request/error counts and an error toast.
 - Works in RTL apps; icons drawn with Views, no icon library.
 
-### react-native-netlog-json-viewer — 0.1.1
+### react-native-netlog-json-viewer
 - Fast, virtualized JSON tree with search (keys / values), next/previous, copy path or value.
 - Array indexes hidden by default (`showArrayIndexes`).
-- Fix: match count no longer clipped on Android.
 
 ### react-native-netlog-desktop
-- `npx netlog-desktop`: pairing QR code in the terminal and browser, live viewer with filters, waterfall, highlighted JSON, HAR export, remote pause/clear, several devices.
-- The viewer only answers this computer by default (`--allow-remote-viewer` to share).
+- `npx netlog-desktop`: pairing QR code in the terminal and browser, live viewer, HAR export, remote pause/clear, several devices.
