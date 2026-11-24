@@ -38,5 +38,14 @@
     "tree",
     "devtools",
     "network-logger"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kaveh-ap/react-native-netLog.git",
+    "directory": "packages/json-viewer"
+  },
+  "homepage": "https://github.com/Kaveh-ap/react-native-netLog/tree/main/packages/json-viewer#readme",
+  "bugs": {
+    "url": "https://github.com/Kaveh-ap/react-native-netLog/issues"
+  }
 }

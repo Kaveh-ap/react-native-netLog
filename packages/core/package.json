@@ -29,5 +29,14 @@
     "xhr",
     "fetch",
     "devtools"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kaveh-ap/react-native-netLog.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/Kaveh-ap/react-native-netLog/tree/main/packages/core#readme",
+  "bugs": {
+    "url": "https://github.com/Kaveh-ap/react-native-netLog/issues"
+  }
 }

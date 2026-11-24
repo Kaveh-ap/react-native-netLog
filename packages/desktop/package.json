@@ -30,5 +30,14 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kaveh-ap/react-native-netLog.git",
+    "directory": "packages/desktop"
+  },
+  "homepage": "https://github.com/Kaveh-ap/react-native-netLog/tree/main/packages/desktop#readme",
+  "bugs": {
+    "url": "https://github.com/Kaveh-ap/react-native-netLog/issues"
   }
 }

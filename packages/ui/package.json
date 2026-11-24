@@ -29,5 +29,14 @@
     "react": "19.2.0",
     "react-native": "0.83.0",
     "typescript": "^5.8.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kaveh-ap/react-native-netLog.git",
+    "directory": "packages/ui"
+  },
+  "homepage": "https://github.com/Kaveh-ap/react-native-netLog/tree/main/packages/ui#readme",
+  "bugs": {
+    "url": "https://github.com/Kaveh-ap/react-native-netLog/issues"
   }
 }
