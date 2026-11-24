@@ -9,6 +9,8 @@ import {
   getEntries,
   getPairingStatus,
   handleNetLogUrl,
+  initNetLog,
+  isCapturing,
   isFeatureEnabled,
   NetLogFeatureDisabledError,
   pairFromPayload,
@@ -163,5 +165,26 @@ describe('pairing payloads', () => {
     expect(parsePairingPayload('https://example.com')).toBeNull();
     expect(parsePairingPayload('netlog://pair?u=http://x&t=1')).toBeNull();
     expect(parsePairingPayload('hello')).toBeNull();
+  });
+});
+
+describe('initNetLog', () => {
+  it('configures and starts capture in one call', () => {
+    const config = initNetLog({ features: { qrPairing: false }, maxEntries: 50 });
+    expect(config.features.qrPairing).toBe(false);
+    expect(config.maxEntries).toBe(50);
+    expect(isCapturing()).toBe(true);
+    request('GET', 'https://x.test/init');
+    expect(getEntries()).toHaveLength(1);
+  });
+
+  it('can configure without capturing, and is safe to call twice', () => {
+    initNetLog({ capture: false });
+    expect(isCapturing()).toBe(false);
+    initNetLog({ features: { qrPairing: false } });
+    initNetLog({ features: { qrPairing: false } });
+    expect(isCapturing()).toBe(true);
+    request('GET', 'https://x.test/once');
+    expect(getEntries()).toHaveLength(1);
   });
 });

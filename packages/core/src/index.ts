@@ -11,6 +11,7 @@ export {
   type NetLogFeatures,
   type IgnoreRule,
 } from './config';
+export { initNetLog, type InitNetLogOptions } from './init';
 export { startCapture, stopCapture, isCapturing, parseHeaders } from './xhr';
 export { getEntries, clearEntries, subscribe, setPaused, isPaused } from './store';
 export {

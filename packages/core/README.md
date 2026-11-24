@@ -7,13 +7,14 @@ Network capture for React Native in plain JS, with no native module and no React
 - Optional desktop pairing: stream traffic to `netlog-desktop` by scanning a QR code
 
 ```ts
-import { configure, startCapture } from 'react-native-netlog';
+import { initNetLog } from 'react-native-netlog';
 
 if (__DEV__) {
-  configure({ ignore: [/\/symbolicate$/] });
-  startCapture();
+  initNetLog({ ignore: [/\/symbolicate$/] }); // configure + start capture
 }
 ```
+
+`initNetLog(config)` takes the config below plus `capture` (default `true`; pass `false` to configure without recording). Calling it again updates the config. The lower-level `configure()` and `startCapture()` are also exported.
 
 ## Feature switches
 
@@ -24,7 +25,7 @@ if (__DEV__) {
 Turn it off for apps that must never send traffic off the device:
 
 ```ts
-configure({ features: { qrPairing: false } });
+initNetLog({ features: { qrPairing: false } });
 ```
 
 ## Config
