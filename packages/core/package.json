@@ -1,5 +1,5 @@
 {
-  "name": "@netlog/core",
+  "name": "react-native-netlog",
   "version": "0.1.0",
   "description": "JS-only network capture for React Native (XMLHttpRequest/fetch), a shared store, and optional desktop pairing.",
   "license": "MIT",

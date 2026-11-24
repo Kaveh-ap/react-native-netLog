@@ -12,7 +12,7 @@ import {
   startCapture,
   stopCapture,
   type PairingStatus,
-} from '@netlog/core';
+} from 'react-native-netlog';
 import { FakeXHR, request } from '../../core/test/fakeXhr';
 // @ts-expect-error plain JS module
 import { startServer } from '../src/server.mjs';

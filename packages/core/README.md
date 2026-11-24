@@ -1,4 +1,4 @@
-# @netlog/core
+# react-native-netlog
 
 Network capture for React Native in plain JS, with no native module and no React Native private APIs.
 
@@ -7,7 +7,7 @@ Network capture for React Native in plain JS, with no native module and no React
 - Optional desktop pairing: stream traffic to `netlog-desktop` by scanning a QR code
 
 ```ts
-import { configure, startCapture } from '@netlog/core';
+import { configure, startCapture } from 'react-native-netlog';
 
 if (__DEV__) {
   configure({ ignore: [/\/symbolicate$/] });
@@ -19,7 +19,7 @@ if (__DEV__) {
 
 | Feature | Default | What it controls |
 |---|---|---|
-| `qrPairing` | `true` | Desktop pairing by QR code or pairing code. When `false`, `DesktopPairing` from `@netlog/ui` renders nothing, and `connectToDesktop`, `pairFromPayload` and `handleNetLogUrl` refuse to connect. In-app capture is unaffected. |
+| `qrPairing` | `true` | Desktop pairing by QR code or pairing code. When `false`, `DesktopPairing` from `react-native-netlog-ui` renders nothing, and `connectToDesktop`, `pairFromPayload` and `handleNetLogUrl` refuse to connect. In-app capture is unaffected. |
 
 Turn it off for apps that must never send traffic off the device:
 
@@ -41,7 +41,7 @@ configure({ features: { qrPairing: false } });
 ## Desktop pairing
 
 ```ts
-import { pairFromPayload, handleNetLogUrl, disconnectFromDesktop } from '@netlog/core';
+import { pairFromPayload, handleNetLogUrl, disconnectFromDesktop } from 'react-native-netlog';
 
 pairFromPayload(scannedQrText, { device: { name: 'Pixel 7', appVersion: '1.2.3' } });
 // or from a deep link: Linking.addEventListener('url', ({ url }) => handleNetLogUrl(url));

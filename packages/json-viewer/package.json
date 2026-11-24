@@ -1,5 +1,5 @@
 {
-  "name": "@netlog/json-viewer",
+  "name": "react-native-netlog-json-viewer",
   "version": "0.1.0",
   "description": "Fast, searchable, dependency-free JSON tree viewer for React Native, with a platform-agnostic core.",
   "license": "MIT",

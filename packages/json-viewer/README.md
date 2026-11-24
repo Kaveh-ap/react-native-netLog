@@ -1,4 +1,4 @@
-# @netlog/json-viewer
+# react-native-netlog-json-viewer
 
 A fast, searchable JSON tree viewer for React Native. No native code, no dependencies.
 
@@ -12,7 +12,7 @@ A fast, searchable JSON tree viewer for React Native. No native code, no depende
 ## Usage
 
 ```tsx
-import { JsonViewer } from '@netlog/json-viewer';
+import { JsonViewer } from 'react-native-netlog-json-viewer';
 import Clipboard from '@react-native-clipboard/clipboard';
 
 <JsonViewer
@@ -43,10 +43,10 @@ import Clipboard from '@react-native-clipboard/clipboard';
 
 ## Core (no React)
 
-`@netlog/json-viewer/core` holds the logic, so the same tree, search and paths work in a web viewer or in tests:
+`react-native-netlog-json-viewer/core` holds the logic, so the same tree, search and paths work in a web viewer or in tests:
 
 ```ts
-import { buildTree, expandedToDepth, visibleRows, searchTree, reveal, getPath } from '@netlog/json-viewer/core';
+import { buildTree, expandedToDepth, visibleRows, searchTree, reveal, getPath } from 'react-native-netlog-json-viewer/core';
 
 const tree = buildTree(value);
 const hits = searchTree(tree, 'stock', { scope: 'all' });

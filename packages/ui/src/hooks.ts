@@ -6,7 +6,7 @@ import {
   subscribePairing,
   type NetLogFeatures,
   type PairingStatus,
-} from '@netlog/core';
+} from 'react-native-netlog';
 
 /** Re-renders when `configure()` changes the feature. Use it to hide entry points, e.g. a "Connect to desktop" row. */
 export function useNetLogFeature(name: keyof NetLogFeatures): boolean {

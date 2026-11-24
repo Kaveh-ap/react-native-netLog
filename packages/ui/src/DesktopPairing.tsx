@@ -9,7 +9,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import { disconnectFromDesktop, pairFromPayload, type DeviceInfo, type PairingStatus } from '@netlog/core';
+import { disconnectFromDesktop, pairFromPayload, type DeviceInfo, type PairingStatus } from 'react-native-netlog';
 import { useNetLogFeature, usePairingStatus } from './hooks';
 
 export interface ScannerProps {
