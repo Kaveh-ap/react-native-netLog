@@ -21,8 +21,11 @@ td{padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap}td.
 tr{cursor:pointer}tr.sel{background:var(--sel)}.pill{padding:1px 6px;border-radius:6px;font:700 12px ui-monospace,Menlo,monospace}
 .s2{color:var(--ok);background:var(--okbg)}.s4{color:var(--warn);background:var(--warnbg)}.s5,.serr{color:var(--err);background:var(--errbg)}.s0{color:var(--muted)}
 pre{margin:0;padding:12px 16px;font:12px/1.55 ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-all;overflow:auto;flex:1}
-#pair{display:flex;gap:24px;align-items:center;flex-wrap:wrap;padding:32px;margin:24px;border:1px dashed var(--border);border-radius:16px;background:var(--surface)}
-#pair[hidden]{display:none}#pair img{width:220px;height:220px;background:#fff;border-radius:12px;padding:8px}code{font:13px ui-monospace,Menlo,monospace;background:var(--bg);padding:2px 6px;border-radius:6px}
+#pair{margin:16px 20px;border:1px dashed var(--border);border-radius:16px;background:var(--surface)}
+#pairToggle{display:flex;align-items:center;gap:12px;width:100%;height:auto;min-height:48px;padding:10px 16px;border:0;border-radius:16px;background:none;text-align:left}
+#pairToggle .chev{margin-left:auto;transition:transform .15s}#pairToggle[aria-expanded="true"] .chev{transform:rotate(180deg)}
+#pairTitle{font-weight:600}#pairBody{display:flex;gap:24px;align-items:center;flex-wrap:wrap;padding:8px 24px 24px}#pairBody[hidden]{display:none}
+#pair img{width:220px;height:220px;background:#fff;border-radius:12px;padding:8px}code{font:13px ui-monospace,Menlo,monospace;background:var(--bg);padding:2px 6px;border-radius:6px}
 .tabs{display:flex;gap:4px;padding:8px 12px 0;border-bottom:1px solid var(--border)}.tabs button{border:0;border-radius:0;border-bottom:2px solid transparent;background:none;color:var(--muted)}.tabs button.on{border-color:var(--text);color:var(--text)}
 #dhead{padding:12px 16px;border-bottom:1px solid var(--border);font:12px ui-monospace,Menlo,monospace;word-break:break-all}
 </style>
@@ -36,14 +39,20 @@ pre{margin:0;padding:12px 16px;font:12px/1.55 ui-monospace,Menlo,monospace;white
   <button id="clear" type="button">Clear</button>
   <button id="har" type="button">Export HAR</button>
 </header>
-<section id="pair" hidden>
+<section id="pair">
+  <button id="pairToggle" type="button" aria-expanded="true" aria-controls="pairBody">
+    <span id="pairTitle">Pair a device</span>
+    <span id="pairSummary" class="muted"></span>
+    <span class="chev" aria-hidden="true">▾</span>
+  </button>
+  <div id="pairBody">
   <img id="qr" alt="Pairing QR code">
   <div>
-    <h2 style="margin:0 0 8px;font-size:18px">Pair a device</h2>
     <p class="muted" style="margin:0 0 12px;max-width:440px">In the app's NetLog screen, tap <b>Connect to desktop</b> and scan this code, or type the pairing code. Phone and computer must be on the same network.</p>
     <p style="margin:0 0 6px">Pairing code: <code id="code"></code></p>
     <p class="muted" style="margin:0">Simulator / USB (after <code>adb reverse tcp:PORT tcp:PORT</code>): <code id="local"></code></p>
     <p style="margin:12px 0 0"><label class="muted">Address for the QR: <select id="hostSel"></select></label></p>
+  </div>
   </div>
 </section>
 <main>
@@ -56,6 +65,15 @@ pre{margin:0;padding:12px 16px;font:12px/1.55 ui-monospace,Menlo,monospace;white
   const $ = (id) => document.getElementById(id);
   const entries = new Map();
   let devices = [], selected = null, tab = 'response', paused = false, pairing = null;
+  // Pairing panel: open while no device is connected, collapsed once one connects.
+  // A click on the bar overrides this until the connected/not-connected state changes.
+  let pairOpen = true, hadOnline = false;
+  function renderPairPanel() {
+    $('pairBody').hidden = !pairOpen;
+    $('pairToggle').setAttribute('aria-expanded', String(pairOpen));
+    $('pairTitle').textContent = hadOnline ? 'Pair another device' : 'Pair a device';
+    $('pairSummary').textContent = !pairOpen && pairing ? pairing.code : '';
+  }
   const key = (e) => e.deviceId + ':' + e.id;
   const ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/viewer');
   ws.onmessage = (ev) => {
@@ -75,7 +93,8 @@ pre{margin:0;padding:12px 16px;font:12px/1.55 ui-monospace,Menlo,monospace;white
     a.download = 'netlog-' + new Date().toISOString().replace(/[:.]/g, '-') + '.har';
     a.click();
   };
-  $('hostSel').onchange = () => { $('qr').src = '/qr.svg?host=' + encodeURIComponent($('hostSel').value) + '&t=' + Date.now(); };
+  $('pairToggle').onclick = () => { pairOpen = !pairOpen; renderPairPanel(); };
+  $('hostSel').onchange =() => { $('qr').src = '/qr.svg?host=' + encodeURIComponent($('hostSel').value) + '&t=' + Date.now(); };
   const hdrs = (o) => Object.entries(o || {}).map(([name, value]) => ({ name, value: String(value) }));
   function toHar(e) {
     return { startedDateTime: new Date(e.startedAt).toISOString(), time: e.durationMs || 0,
@@ -92,8 +111,9 @@ pre{margin:0;padding:12px 16px;font:12px/1.55 ui-monospace,Menlo,monospace;white
     renderDevices();
   }
   function renderDevices() {
-    const online = devices.filter((d) => d.online);
-    $('pair').hidden = online.length > 0;
+    const hasOnline = devices.some((d) => d.online);
+    if (hasOnline !== hadOnline) { hadOnline = hasOnline; pairOpen = !hasOnline; }
+    renderPairPanel();
     const el = $('devices'); el.replaceChildren();
     if (!devices.length) { el.textContent = 'No device connected'; return; }
     devices.forEach((d) => { const s = document.createElement('span'); s.style.marginRight = '12px';
